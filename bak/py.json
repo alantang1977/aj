@@ -1,0 +1,1438 @@
+{
+"spider":"./jar/pg.jar",
+"wallpaper":"https://imgs.catvod.com/","logo":"./Pictures/junmeng.gif",
+"sites": [
+    {
+      "key": "js_guan_fang_cai_ji",
+      "name": "官方采集(js)",
+      "type": 3,
+      "api": "./js/官方采集.min.js",
+      "searchable": 1,
+      "quickSearch": 0,
+      "filterable": 0,
+      "changeable": 0
+    },
+    {
+      "key": "新韩剧",
+      "name": "新韩剧网(js)",
+      "type": 3,
+      "api": "./js/新韩剧网.js",
+      "searchable": 1,
+      "quickSearch": 0,
+      "filterable": 0,
+      "changeable": 0
+    },
+   {
+  "key": "js_ttt",
+  "name": "禁漫天堂(js)",
+  "type": 3,
+  "api": "./js/禁漫天堂.js",
+  "searchable": 1,
+  "quickSearch": 0,
+  "filterable": 0,
+  "changeable": 0
+},
+{
+  "key": "js_ying_hua",
+  "name": "樱花视频(js)",
+  "type": 3,
+  "api": "./js/樱花视频.min.js",
+  "searchable": 1,
+  "quickSearch": 0,
+  "filterable": 0,
+  "changeable": 0,
+  "ext": {}
+},
+{
+  "key": "js_madou",
+  "name": "麻豆(js)",
+  "type": 3,
+  "api": "./js/麻豆.min.js",
+  "searchable": 1,
+  "quickSearch": 0,
+  "filterable": 0,
+  "changeable": 0,
+  "ext": {}
+},  
+ {
+  "key": "js_138FM",
+  "name": "138FM(18+)(js)",
+  "type": 3,
+  "api": "./js/138FM.min.js",
+  "searchable": 1,
+  "quickSearch": 0,
+  "filterable": 0,
+  "changeable": 0,
+  "ext":{}
+  },          {
+ "key": "动态py",
+ "name": "永乐",
+ "type": 4,
+ "api": "http://zhangqun1818.serv00.net:5052/?sp=永乐视频",
+ "style": {
+ "type": "rect",
+ "ratio": 1.33
+ },
+ "changeable": 1
+ },{
+            "key": "两个BT",
+            "name": "两个BT",
+            "type": 4,
+            "api": "http://zhangqun1818.serv00.net:5052/?sp=两个BT",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+  {
+      "key": "456movie",
+      "name": "456movie)",
+      "type": 3,
+      "api": "./py/456movie.py",
+      "searchable": 1,
+      "quickSearch": 0,
+      "filterable": 0,
+      "changeable": 0
+    },  
+{
+      "key": "py_fei_fan_zi_yuan",
+      "name": "非凡资源(py)",
+      "type": 3,
+      "api": "./py/非凡资源.min.py",
+      "searchable": 1,
+      "quickSearch": 0,
+      "filterable": 0,
+      "changeable": 0
+    },  
+          {
+            "key": "cctv",
+            "name": "cctv",
+            "type": 3,
+            "api": "./PY/cctv.py",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "changeable": 1
+        },
+    {
+      "key": "py_dm84",
+      "name": "动漫巴士(py)",
+      "type": 3,
+      "api": "./py/动漫巴士.py",
+      "searchable": 1,
+      "quickSearch": 0,
+      "filterable": 0,
+      "changeable": 0
+    },              {
+            "key": "58视频",
+            "name": "58视频",
+            "type": 3,
+            "api": "./PY/58视频.py",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "changeable": 1
+        },        
+          {
+            "key": "javxx",
+            "name": "javxx 𒉽",
+            "type": 3,
+            "searchable": 1,
+            "quickSearch": 0,
+            "filterable": 0,
+            "api": "./py/javxx.py",
+            "ext": {
+                "proxy": {},
+                "plp": ""
+            }
+        },
+           {
+            "key": "韩国BJ",
+            "name": "韩国BJ",
+            "type": 3,
+            "api": "./py/韩国BJ.py",
+            "searchable": 1,
+            "changeable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "playerType": 2
+        },          
+                {
+            "key": "lsp传媒",
+            "name": "lsp传媒",
+            "type": 3,
+            "api": "./py/lsp传媒.py",
+            "searchable": 1,
+            "changeable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "playerType": 2
+        },        
+        {
+            "key": "51吃瓜",
+            "name": "51吃瓜",
+            "type": 3,
+            "api": "./PY/51吃瓜.py",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "changeable": 1
+        },           
+         {
+            "key": "花都影院",
+            "name": "花都影院",
+            "type": 3,
+            "api": "./PY/花都影院.py",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "changeable": 1
+        },
+                {
+            "key": "云云",
+            "name": "云云",
+            "type": 3,
+            "api": "./PY/云云.py",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "changeable": 1
+        },
+         {
+            "key": "熊猫直播",
+            "name": "熊猫直播",
+            "type": 3,
+            "api": "./PY/熊猫直播.py",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "changeable": 1
+        },
+        {
+            "key": "4KVM",
+            "name": "4KVM",
+            "type": 3,
+            "api": "./py/4KVM.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "fullhd",
+            "name": "fullhd",
+            "type": 3,
+            "api": "./py/fullhd.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "小鸡暴走",
+            "name": "小鸡暴走",
+            "type": 3,
+            "api": "./py/小鸡暴走.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "hohaiemby",
+            "name": "hohai|EMBY",
+            "type": 3,
+            "api": "./py/emby.py",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "changeable": 1,
+            "ext": {
+                "server": "https://emby.hohai.eu.org:443",
+                "username": "chuxin666",
+                "password": "ycc123456",
+                "proxy": "",
+                "thread": 0,
+                "device_name": "My Computer",
+                "client": "Hills Windows",
+                "client_version": "0.2.2",
+                "device_id": "a9f74849-83d5-4a28-8b85-a087af1402e3"
+        }
+        },     
+        {
+            "key": "今日看料",
+            "name": "今日看料",
+            "type": 3,
+            "api": "./PY/今日看料.py",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "changeable": 1
+        },
+        {
+            "key": "UVod",
+            "name": "UVod",
+            "type": 3,
+            "api": "./PY/UVod.py",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "changeable": 1
+        },
+        {
+            "key": "黄色仓库",
+            "name": "黄色仓库",
+            "type": 3,
+            "api": "./PY/黄色仓库.py",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "changeable": 1
+        },
+        {
+            "key": "努努影院",
+            "name": "努努影院",
+            "type": 3,
+            "api": "./PY/努努影院.py",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "changeable": 1
+        },   
+        {
+            "key": "饭团影视",
+            "name": "饭团影视",
+            "type": 3,
+            "api": "./PY/饭团影视.py",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "changeable": 1
+        },     
+        {
+            "key": "金牌",
+            "name": "金牌",
+            "type": 3,
+            "api": "./PY/金牌.py",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "changeable": 1
+        },
+        {
+            "key": "18",
+            "name": "18",
+            "type": 3,
+            "api": "./py/18.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "4K影视",
+            "name": "4K影视",
+            "type": 3,
+            "api": "./py/4K影视.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "51吸瓜",
+            "name": "51吸瓜",
+            "type": 3,
+            "searchable": 1,
+            "api": "./py/51吸瓜.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "51吸瓜动态版",
+            "name": "51吸瓜动态版",
+            "type": 3,
+            "searchable": 1,
+            "api": "./py/51吸瓜动态版.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "91rb",
+            "name": "91rb",
+            "type": 3,
+            "api": "./py/91rb.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "懒懒视频",
+            "name": "懒懒视频",
+            "type": 3,
+            "api": "./py/懒懒视频.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "DSYS",
+            "name": "DSYS",
+            "type": 3,
+            "api": "./py/DSYS.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "河马短剧",
+            "name": "河马短剧",
+            "type": 3,
+            "api": "./py/河马短剧.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "芒果TV",
+            "name": "芒果TV",
+            "type": 3,
+            "api": "./py/芒果TV.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "八戒影视",
+            "name": "八戒影视",
+            "type": 3,
+            "api": "./py/八戒影视.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "嗷呜动漫",
+            "name": "嗷呜动漫",
+            "type": 3,
+            "api": "./py/嗷呜动漫.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "企鹅体育",
+            "name": "企鹅体育",
+            "type": 3,                 
+            "searchable": 1,
+            "api": "./py/企鹅体育.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "麦田影院",
+            "name": "麦田影院",
+            "type": 3,
+            "api": "./py/麦田影院.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "山有木兮",
+            "name": "山有木兮",
+            "type": 3,
+            "api": "./py/山有木兮.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "Xvideos",
+            "name": "Xvideos",
+            "type": 3,
+            "api": "./py/Xvideos.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },              
+          {
+            "key": "哇哇",
+            "name": "哇哇",
+            "type": 3,
+            "api": "./py/哇哇.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "Pornhub",
+            "name": "Pornhub",
+            "type": 3,                 
+            "searchable": 1,
+            "api": "./py/Pornhub.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "ThePorn",
+            "name": "ThePorn",
+            "type": 3,
+            "api": "./py/ThePorn.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "cam4",
+            "name": "cam4",
+            "type": 3,
+            "api": "./py/cam4.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "YYMP3音乐网",
+            "name": "YYMP3音乐网",
+            "type": 3,
+            "api": "./py/YYMP3音乐网.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "bili",
+            "name": "bili",
+            "type": 3,
+            "api": "./py/bili.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "boyfriend.show",
+            "name": "boyfriend.show",
+            "type": 3,
+            "api": "./py/boyfriend.show.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "天空影视",
+            "name": "天空影视",
+            "type": 3,
+            "api": "./py/天空影视.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "epo",
+            "name": "epo",
+            "type": 3,
+            "api": "./py/epo.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "lav",
+            "name": "lav",
+            "type": 3,
+            "api": "./py/lav.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "lingdu",
+            "name": "lingdu",
+            "type": 3,
+            "api": "./py/lingdu.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "lives",
+            "name": "lives",
+            "type": 3,
+            "api": "./py/lives.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "onlyfans gv",
+            "name": "onlyfans gv",
+            "type": 3,
+            "api": "./py/onlyfans gv.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "天天动漫",
+            "name": "天天动漫",
+            "type": 3,
+            "api": "./py/天天动漫.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "随机小姐姐",
+            "name": "随机小姐姐",
+            "type": 3,
+            "api": "./py/随机小姐姐.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "欣欣影视",
+            "name": "欣欣影视",
+            "type": 3,
+            "api": "./py/欣欣影视.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "stripchat",
+            "name": "stripchat",
+            "type": 3,
+            "api": "./py/stripchat.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "土豆浏览器",
+            "name": "土豆浏览器",
+            "type": 3,
+            "api": "./py/土豆浏览器.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "色播聚合",
+            "name": "色播聚合",
+            "type": 3,
+            "api": "./py/色播聚合.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "redflix",
+            "name": "redflix",
+            "type": 3,
+            "api": "./py/redflix.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "stgay",
+            "name": "stgay",
+            "type": 3,
+            "api": "./py/stgay.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "uaa有声",
+            "name": "uaa有声",
+            "type": 3,
+            "api": "./py/uaa有声.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "小红影视",
+            "name": "小红影视",
+            "type": 3,
+            "api": "./py/小红影视.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "xhamster",
+            "name": "xhamster",
+            "type": 3,
+            "api": "./py/xhamster.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "国外剧",
+            "name": "国外剧",
+            "type": 3,
+            "api": "./py/国外剧.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "139fm多分类",
+            "name": "139fm多分类",
+            "type": 3,
+            "api": "./py/139fm多分类.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "一个区",
+            "name": "一个区",
+            "type": 3,
+            "api": "./py/一个区.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "七区",
+            "name": "七区",
+            "type": 3,
+            "api": "./py/七区.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "两个BT",
+            "name": "两个BT",
+            "type": 3,
+            "api": "./py/两个BT.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "91吃瓜",
+            "name": "91吃瓜",
+            "type": 3,
+            "api": "./py/91吃瓜.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "九个区",
+            "name": "九个区",
+            "type": 3,
+            "api": "./py/九个区.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "优酷视频",
+            "name": "优酷视频",
+            "type": 3,
+            "api": "./py/优酷视频.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "剧王短剧",
+            "name": "剧王短剧",
+            "type": 3,
+            "api": "./py/剧王短剧.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "厂长资源",
+            "name": "厂长资源",
+            "type": 3,
+            "api": "./py/厂长资源.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "苹果视频",
+            "name": "苹果视频",
+            "type": 3,
+            "api": "./py/苹果视频.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "哔哩视频",
+            "name": "哔哩视频",
+            "type": 3,
+            "api": "./py/哔哩视频.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "四虎视频",
+            "name": "四虎视频",
+            "type": 3,
+            "api": "./py/四虎视频.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "奇优动漫",
+            "name": "奇优动漫",
+            "type": 3,
+            "api": "./py/奇优动漫.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "好色Tv",
+            "name": "好色Tv",
+            "type": 3,
+            "api": "./py/好色Tv.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "小红薯",
+            "name": "小红薯",
+            "type": 3,
+            "api": "./py/小红薯.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "小苹果影视",
+            "name": "小苹果影视",
+            "type": 3,
+            "api": "./py/小苹果影视.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "小鸭子看看",
+            "name": "小鸭子看看",
+            "type": 3,
+            "api": "./py/小鸭子看看.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "影视工厂",
+            "name": "影视工厂",
+            "type": 3,
+            "api": "./py/影视工厂.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "推特",
+            "name": "推特",
+            "type": 3,
+            "api": "./py/推特.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "新荐片",
+            "name": "新荐片",
+            "type": 3,
+            "api": "./py/新荐片.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "西瓜视频",
+            "name": "西瓜视频",
+            "type": 3,
+            "api": "./py/西瓜视频.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "柯南影视",
+            "name": "柯南影视",
+            "type": 3,
+            "api": "./py/柯南影视.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "永乐视频",
+            "name": "永乐视频",
+            "type": 3,
+            "api": "./py/永乐视频.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "泥视频",
+            "name": "泥视频",
+            "type": 3,
+            "api": "./py/泥视频.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "浴火社",
+            "name": "浴火社",
+            "type": 3,
+            "api": "./py/浴火社.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "涩琪",
+            "name": "涩琪",
+            "type": 3,
+            "api": "./py/涩琪.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "熊猫",
+            "name": "熊猫",
+            "type": 3,
+            "api": "./py/熊猫.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "爱壹帆",
+            "name": "爱壹帆",
+            "type": 3,
+            "api": "./py/爱壹帆.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "爱瓜影视",
+            "name": "爱瓜影视",
+            "type": 3,
+            "api": "./py/爱瓜影视.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "爱看短剧",
+            "name": "爱看短剧",
+            "type": 3,
+            "api": "./py/爱看短剧.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "星芽短剧",
+            "name": "星芽短剧",
+            "type": 3,
+            "api": "./py/星芽短剧.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "甜圈短剧",
+            "name": "甜圈短剧",
+            "type": 3,
+            "api": "./py/甜圈短剧.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "电影猎手",
+            "name": "电影猎手",
+            "type": 3,
+            "api": "./py/电影猎手.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "界影视",
+            "name": "界影视",
+            "type": 3,
+            "api": "./py/界影视.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "禁片天堂",
+            "name": "禁片天堂",
+            "type": 3,
+            "api": "./py/禁片天堂.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "绝对影视",
+            "name": "绝对影视",
+            "type": 3,
+            "api": "./py/绝对影视.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "肉视频",
+            "name": "肉视频",
+            "type": 3,
+            "api": "./py/肉视频.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "茶杯狐影视",
+            "name": "茶杯狐影视",
+            "type": 3,
+            "api": "./py/茶杯狐影视.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "荐片",
+            "name": "荐片",
+            "type": 3,
+            "api": "./py/荐片.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "葡萄5区",
+            "name": "葡萄5区",
+            "type": 3,
+            "api": "./py/葡萄5区.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "锦鲤短剧",
+            "name": "锦鲤短剧",
+            "type": 3,
+            "api": "./py/锦鲤短剧.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "韩国色情电影",
+            "name": "韩国色情电影",
+            "type": 3,
+            "api": "./py/韩国色情电影.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "香蕉视频",
+            "name": "香蕉视频",
+            "type": 3,
+            "api": "./py/香蕉视频.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "骚火影视",
+            "name": "骚火影视",
+            "type": 3,
+            "api": "./py/骚火影视.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "91网爆黑料",
+            "name": "91网爆黑料",
+            "type": 3,
+            "api": "./py/91网爆黑料.py",
+            "style": {
+                "type": "rect",
+                "ratio": 1.33
+            },
+            "changeable": 1
+        },
+        {
+            "key": "黑料弹幕版",
+            "name": "黑料弹幕版",
+            "type": 3,
+            "api": "./PY/黑料弹幕版.py",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "changeable": 1
+        }
+    ],
+    "parses": [
+        {
+            "name": "解析聚合",
+            "type": 3,
+            "url": "Web"
+        },
+        {
+            "name": "777",
+            "type": 0,
+            "url": "https://www.huaqi.live/?url="
+        },
+        {
+            "name": "jsonplayer",
+            "type": 0,
+            "url": "https://jx.jsonplayer.com/player/?url="
+        },
+        {
+            "name": "xmflv",
+            "type": 0,
+            "url": "https://jx.xmflv.com/?url="
+        }
+    ],
+    "flags": [
+        "youku",
+        "tudou",
+        "qq",
+        "qiyi",
+        "iqiyi",
+        "leshi",
+        "letv",
+        "sohu",
+        "imgo",
+        "mgtv",
+        "bilibili",
+        "pptv",
+        "PPTV",
+        "migu"
+    ],
+    "doh": [
+        {
+            "name": "Google",
+            "url": "https://dns.google/dns-query",
+            "ips": [
+                "8.8.4.4",
+                "8.8.8.8"
+            ]
+        },
+        {
+            "name": "Cloudflare",
+            "url": "https://cloudflare-dns.com/dns-query",
+            "ips": [
+                "1.1.1.1",
+                "1.0.0.1",
+                "2606:4700:4700::1111",
+                "2606:4700:4700::1001"
+            ]
+        },
+        {
+            "name": "AdGuard",
+            "url": "https://dns.adguard.com/dns-query",
+            "ips": [
+                "94.140.14.140",
+                "94.140.14.141"
+            ]
+        },
+        {
+            "name": "DNSWatch",
+            "url": "https://resolver2.dns.watch/dns-query",
+            "ips": [
+                "84.200.69.80",
+                "84.200.70.40"
+            ]
+        },
+        {
+            "name": "Quad9",
+            "url": "https://dns.quad9.net/dns-query",
+            "ips": [
+                "9.9.9.9",
+                "149.112.112.112"
+            ]
+        }
+    ],
+    "lives": [      
+            {
+            "name": "全量四季在线",
+            "type": "0",
+            "ua": "okhttp/3.15",
+            "url": "https://php.946985.filegear-sg.me/jackTV.m3u"
+        },
+            {
+            "name": "体育直播",
+            "type": 3,
+            "api": "./py/体育直播.py",
+      "ext": {}
+        },
+    {
+      "name": "SMT(py)",
+      "type": 3,
+      "api": "./py/lives-SMT.py",
+      "ext": {}
+    },
+    {
+            "name": "iptv345",
+            "type": 3,
+            "api": "./py/lives-iptv345.py",
+            "ext": {}
+        },
+        {
+            "name": "zxbv",
+            "type": 3,
+            "api": "./py/live_zxbv.py",
+            "ext": {}
+        },
+        {
+            "name": "kzb",
+            "type": 3,
+            "api": "./py/lives-kzb.py",
+            "ext": {}
+        },
+    {
+      "name": "直播bx5kge(js)",
+      "type": 3,
+      "url": "https://b6f56s23.bx5kge.com/assets/js/tv.js",
+      "api": "./js/直播bx5kge.min.js",
+      "ext": {}
+    },
+    {
+      "name": "快直播(js)",
+      "type": 3,
+      "url": "https://jzb5kqln.huajiaedu.com",
+      "api": "./js/快直播.min.js",
+      "ext": {}
+},
+        {
+            "name": "MY live-catvod",
+            "type": "0",
+            "ua": "okhttp/3.15",
+            "url": "https://live.catvod.com/tv.m3u"
+        },
+        {
+            "name": "MY live-catvod-local",
+            "type": "0",
+            "ua": "okhttp/3.15",
+            "url": "http://127.0.0.1:9978/file/lives/Live-catvod.txt"
+        },
+        {
+            "name": "MQiTV",
+            "api": "csp_MQiTV",
+            "jar": "https://daili.korice.eu.org/https://raw.githubusercontent.com/sqspot/tac/refs/heads/main/jar/fmMQiTV.jar",
+            "ext": "https://59.125.210.231:4433",
+            "playerType": 1,
+            "epg": "http://epg.112114.xyz/?ch={name}&date={date}"
+        },
+        {
+            "name": "肥羊国内直播",
+            "type": 3,
+            "api": "csp_Feiyang",
+            "url": "tv.m3u",
+            "ext": "https://daili.korice.eu.org/https://raw.githubusercontent.com/lystv/fmapp/ok/apk/allinone/v7/allinone;md5;https://daili.korice.eu.org/https://raw.githubusercontent.com/lystv/fmapp/ok/apk/allinone/v7/md5",
+            "jar": "https://daili.korice.eu.org/https://raw.githubusercontent.com/FongMi/CatVodSpider/main/jar/custom_spider.jar"
+        }
+    ]
+}

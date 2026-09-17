@@ -1,0 +1,216 @@
+{
+  "sources": [
+    {
+      "name": "Web鱼壳海豚常规23",
+      "url": "https://ghfast.top/https://raw.githubusercontent.com/FGBLH/HKL/refs/heads/main/Web鱼壳海豚常规23",
+      "enabled": true
+    },
+    {
+      "name": "饭太硬",
+      "url": "http://www.饭太硬.cc/tv",
+      "enabled": true
+    },
+    {
+      "name": "潇洒接口",
+      "url": "https://cnb.cool/fish2035/xs/-/git/raw/main/api.json",
+      "enabled": true
+    },
+    {
+      "name": "裤佬接口",
+      "url": "https://gh-proxy.org/https://raw.githubusercontent.com/Jsnzkpg/Jsnzkpg/Jsnzkpg/Jsnzkpg",
+      "enabled": true
+    },
+    {
+      "name": "摸鱼接口",
+      "url": "http://摸鱼儿.cc",
+      "enabled": true
+    },
+    {
+      "name": "易发接口",
+      "url": "https://gh-proxy.org/https://raw.githubusercontent.com/fafa002/yf2025/refs/heads/main/yifatvbox3.josn",
+      "enabled": true
+    },
+    {
+      "name": "王二小放牛娃",
+      "url": "https://9280.kstore.vip/newwex.json",
+      "enabled": true
+    },
+    {
+      "name": "嗷呜",
+      "url": "http://www.英格里希嗷呜.top/tv",
+      "enabled": true
+    }
+  ],
+  "download_output_dir": "./本地包",
+  "download": {
+    "skip_extensions": [
+      ".php",
+      ".asp",
+      ".jsp",
+      ".cgi",
+      ".exe",
+      ".dll",
+      ".sh",
+      ".bat"
+    ],
+    "skip_patterns": [
+      "广告",
+      "test",
+      "temp"
+    ],
+    "max_file_size_mb": 100,
+    "recursive_depth": 2,
+    "decrypt": {
+      "enabled": false,
+      "external_api_url": "https://xn--v4q818bf34b.cc/helper/api.php"
+    },
+    "overwrite": true,
+    "timeout_connect": 10,
+    "timeout_read": 60,
+    "chunk_size": 8192,
+    "max_workers": 8,
+    "retry_total": 2,
+    "retry_backoff": 0.3,
+    "pool_connections": 10,
+    "pool_maxsize": 20,
+    "category_map": {
+      "js": ".js",
+      "lib": ".json",
+      "py": ".py",
+      "jar": ".jar"
+    },
+    "skip_patterns_core": [
+      "/api\\.php/provide/vod",
+      "/api\\.php/app/",
+      "provide/vod",
+      "\\?url=",
+      "\\{name\\}",
+      "\\{date\\}",
+      "\\{episode\\}",
+      "proxy://"
+    ],
+    "proxy": "",
+    "concurrent": 3,
+    "user_agent": "okhttp/4.12.0",
+    "github_proxy": "https://gh.jasonzeng.dev/",
+    "github_proxy_patterns": [
+      "https?://gh-proxy\\.com/",
+      "https?://ghproxy\\.net/",
+      "https?://ghfast\\.top/",
+      "https?://ghproxy\\.cc/",
+      "https?://mirror\\.ghproxy\\.com/",
+      "https?://gh\\.jasonzeng\\.dev/",
+      "https?://fastgit\\.cc/",
+      "https?://raw\\.githubusercontent\\.com/",
+      "https?://git\\.yylx\\.win/",
+      "https?://gh\\.927223\\.xyz/",
+      "https?://gh\\.xxooo\\.cf/",
+      "https?://gh-proxy\\.org/"
+    ]
+  },
+  "proxy": "",
+  "github_proxy": "https://gh.jasonzeng.dev/",
+  "github_proxy_patterns": [
+    "https?://gh-proxy\\.com/",
+    "https?://ghproxy\\.net/",
+    "https?://ghfast\\.top/",
+    "https?://ghproxy\\.cc/",
+    "https?://mirror\\.ghproxy\\.com/",
+    "https?://gh\\.jasonzeng\\.dev/",
+    "https?://fastgit\\.cc/",
+    "https?://raw\\.githubusercontent\\.com/",
+    "https?://git\\.yylx\\.win/",
+    "https?://gh\\.927223\\.xyz/",
+    "https?://gh\\.xxooo\\.cf/",
+    "https?://gh-proxy\\.org/"
+  ],
+  "concurrent": 3,
+  "user_agent": "okhttp/4.12.0",
+  "external_api_url": "https://xn--v4q818bf34b.cc/helper/api.php",
+  "log": {
+    "enabled": true,
+    "level": "debug",
+    "dir": "./本地包/log"
+  },
+  "localized_interfaces": [
+    {
+      "parent_dir": "I:\\Download\\本地包一键下载\\本地包\\Web鱼壳海豚常规23",
+      "dir_name": "Web鱼壳海豚常规23",
+      "json_files": [
+        "I:\\Download\\本地包一键下载\\本地包\\Web鱼壳海豚常规23\\Web鱼壳海豚常规23.json"
+      ],
+      "selected": "I:\\Download\\本地包一键下载\\本地包\\Web鱼壳海豚常规23\\Web鱼壳海豚常规23.json",
+      "hidden": false
+    },
+    {
+      "parent_dir": "I:\\Download\\本地包一键下载\\本地包\\饭太硬",
+      "dir_name": "饭太硬",
+      "json_files": [
+        "I:\\Download\\本地包一键下载\\本地包\\饭太硬\\饭太硬.json"
+      ],
+      "selected": "I:\\Download\\本地包一键下载\\本地包\\饭太硬\\饭太硬.json",
+      "hidden": false
+    },
+    {
+      "parent_dir": "I:\\Download\\本地包一键下载\\本地包\\潇洒接口",
+      "dir_name": "潇洒接口",
+      "json_files": [
+        "I:\\Download\\本地包一键下载\\本地包\\潇洒接口\\潇洒接口.json"
+      ],
+      "selected": "I:\\Download\\本地包一键下载\\本地包\\潇洒接口\\潇洒接口.json",
+      "hidden": false
+    },
+    {
+      "parent_dir": "I:\\Download\\本地包一键下载\\本地包\\裤佬接口",
+      "dir_name": "裤佬接口",
+      "json_files": [
+        "I:\\Download\\本地包一键下载\\本地包\\裤佬接口\\裤佬接口.json"
+      ],
+      "selected": "I:\\Download\\本地包一键下载\\本地包\\裤佬接口\\裤佬接口.json",
+      "hidden": false
+    },
+    {
+      "parent_dir": "I:\\Download\\本地包一键下载\\本地包\\摸鱼接口",
+      "dir_name": "摸鱼接口",
+      "json_files": [
+        "I:\\Download\\本地包一键下载\\本地包\\摸鱼接口\\摸鱼接口.json"
+      ],
+      "selected": "I:\\Download\\本地包一键下载\\本地包\\摸鱼接口\\摸鱼接口.json",
+      "hidden": false
+    },
+    {
+      "parent_dir": "I:\\Download\\本地包一键下载\\本地包\\易发接口",
+      "dir_name": "易发接口",
+      "json_files": [
+        "I:\\Download\\本地包一键下载\\本地包\\易发接口\\易发接口.json"
+      ],
+      "selected": "I:\\Download\\本地包一键下载\\本地包\\易发接口\\易发接口.json",
+      "hidden": false
+    },
+    {
+      "parent_dir": "I:\\Download\\本地包一键下载\\本地包\\王二小放牛娃",
+      "dir_name": "王二小放牛娃",
+      "json_files": [
+        "I:\\Download\\本地包一键下载\\本地包\\王二小放牛娃\\王二小放牛娃.json"
+      ],
+      "selected": "I:\\Download\\本地包一键下载\\本地包\\王二小放牛娃\\王二小放牛娃.json",
+      "hidden": false
+    },
+    {
+      "parent_dir": "I:\\Download\\本地包一键下载\\本地包\\嗷呜",
+      "dir_name": "嗷呜",
+      "json_files": [
+        "I:\\Download\\本地包一键下载\\本地包\\嗷呜\\嗷呜.json"
+      ],
+      "selected": "I:\\Download\\本地包一键下载\\本地包\\嗷呜\\嗷呜.json",
+      "hidden": false
+    }
+  ],
+  "root_dirs": [
+    "I:\\Download\\本地包一键下载\\本地包"
+  ],
+  "decrypt_filename_template": "{name}_m.json",
+  "localized_filename_template": "{name}.json",
+  "inject_manager_site": true,
+  "oktv_switch_timeout": 2
+}

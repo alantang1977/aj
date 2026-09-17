@@ -1,0 +1,215 @@
+{ 
+  "spider": "./jar/zx.jar",
+  "logo": "./a2.jpg",
+	"sites":[
+    {
+      "key": "py_BadNews",
+      "name": "🔞BadNews(T4)",
+      "type": 4,
+      "api": "https://py.doube.eu.org/spider?site=BadNews",
+      "searchable": 1,
+      "quickSearch": 0,
+      "filterable": 0,
+      "changeable": 0,
+      "style": {"type": "rect", "ratio": 1.5}
+    },
+    {
+      "key": "py_rou",
+      "name": "🔞+翻墙_Rou(T3)",
+      "type": 3,
+      "api": "./py/py18/肉视频.py",
+      "searchable": 1,
+      "quickSearch": 0,
+      "filterable": 0,
+      "changeable": 0
+     },
+    {
+      "key": "py_AiDou",
+      "name": "🔞+[AiDou](T4)",
+      "type": 4,
+      "api": "https://py.doube.eu.org/spider?site=AiDou",
+      "searchable": 1,
+      "quickSearch": 0,
+      "filterable": 0,
+      "changeable": 0,
+      "style": {
+      "type": "rect",
+      "ratio": 1.5}
+    },  
+   {       
+      "key": "py_Miss",
+      "name": "🔞[MissAV](T4)",
+      "type": 4,
+      "api": "https://py.doube.eu.org/spider?site=Miss",
+      "searchable": 1,
+      "quickSearch": 0,
+      "filterable": 0,
+      "changeable": 0
+     },
+    {
+      "key": "php_madou",
+      "name": "🔞麻豆(T4)",
+      "type": 4,
+      "api": "https://py.doube.eu.org/spider?site=MaDou",
+      "searchable": 1,
+      "quickSearch": 0,
+      "filterable": 0,
+      "changeable": 0,
+      "style": {"type": "rect", "ratio": 1.5}
+      },
+ {
+  "key": "js_madou",
+  "name": "麻豆(js)",
+  "type": 3,
+  "api": "./js/麻豆.min.js",
+  "searchable": 1,
+  "quickSearch": 0,
+  "filterable": 0,
+  "changeable": 0,
+  "ext": {}
+},
+	{
+      "key": "py_MrJav",
+      "name": "🔞MRJav(T4)",
+      "type": 4,
+      "api": "https://py.doube.eu.org/spider?site=MrJav",
+      "searchable": 1,
+      "quickSearch": 0,
+      "filterable": 0,
+      "changeable": 0,
+      "style": {
+        "type": "rect",
+        "ratio": 1}
+     },
+   {
+      "key": "Missav",
+      "name": "Missav_proxy",
+      "type": 3,
+      "searchable": 0,
+      "quickSearch": 0,
+      "filterable": 0,
+      "api": "./py/py18/Miss.py",
+      "ext": {
+      "site": "https://missAV.ai",
+      "cfgo": "./py/cf-proxy-linux-arm64",
+      "plp": "",
+      "proxy": {
+      "http": "http://127.0.0.1:1072",
+      "https": "http://127.0.0.1:1072"}}
+      },
+    {
+      "key": "py-rou",
+      "name": "py_rou肉视频",
+      "type": 3,
+      "api": "./py/py18/py_rou.py",
+      "searchable": 1,
+      "filterable": 0,
+      "changeable": 0,
+      "quickSearch": 0
+    },
+    {
+      "key": "py-18",
+      "name": "py_18",
+      "type": 3,
+      "api": "./py/py18/18.py",
+      "searchable": 1,
+      "filterable": 0,
+      "changeable": 0,
+      "quickSearch": 0
+    },
+    {
+      "key": "Supjav.py",
+      "name": "Supjav.py",
+      "type": 3,
+      "api": "./py/py18/Supjav.py",
+      "searchable": 1,
+      "filterable": 0,
+      "changeable": 0,
+      "quickSearch": 0
+    },
+    {
+      "key": "py-18",
+      "name": "py_18",
+      "type": 3,
+      "api": "./py/py18/18.py",
+      "searchable": 1,
+      "filterable": 0,
+      "changeable": 0,
+      "quickSearch": 0
+    },
+    {
+      "key": "py-xhamster",
+      "name": "py_xhamster",
+      "type": 3,
+      "api": "./py/py18/xhamster.py",
+      "searchable": 1,
+      "filterable": 0,
+      "changeable": 0,
+      "quickSearch": 0
+    },
+	{
+	  "key": "py_lav.py",
+      "name": "⏭｜🔞LAV｜PYTHON",
+      "type": 3,
+      "api": "./py/py18/lav.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+	 },
+   {
+      "key": "ConfigCenter",
+      "name":"真心配置中心",
+      "type": 3,
+      "api": "csp_ConfigCenter",
+      "searchable": 0,
+      "changeable": 0,
+      "ext": {
+      "commonConfig": "./py/peizhi.json"}
+     },
+   {
+            "key": "js_ying_hua",
+            "name": "樱花视频(js)",
+            "type": 3,
+            "api": "./js/樱花视频.min.js",
+            "searchable": 1,
+            "quickSearch": 0,
+            "filterable": 0,
+            "changeable": 0,
+            "ext": {}
+       },
+       {
+            "key": "py_sbyy",
+            "name": "神秘影院",
+            "type": 3,
+            "api": "./py/py18/神秘影院.py",
+            "searchable": 1,
+            "quickSearch": 0,
+            "filterable": 0,
+            "changeable": 0,
+            "ext": {}
+       },
+       {
+            "key": "py_jykl",
+            "name": "今日看料",
+            "type": 3,
+            "api": "./py/py18/今日看料.py",
+            "searchable": 1,
+            "quickSearch": 0,
+            "filterable": 0,
+            "changeable": 0,
+            "ext": {}
+       },
+       {
+            "key": "py_javdb",
+            "name": "javdb.py",
+            "type": 3,
+            "api": "./py/py18/javdb.py",
+            "searchable": 1,
+            "quickSearch": 0,
+            "filterable": 0,
+            "changeable": 0,
+            "ext": {}
+       }
+    
+    ]
+}      
