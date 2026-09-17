@@ -251,7 +251,6 @@ https://www.tutieshi.com/
     http://yydf:abcd@my.540734621.xyz/a/猫源.json
     http://yydf:abcd@my.540734621.xyz/b/猫源.json
     http://yydf:abcd@my.540734621.xyz/c/猫源.json
-    github://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@github.com/ZTHA000/catvod/main/js/config_open69.json
 
 ------
 
