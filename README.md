@@ -49,7 +49,7 @@ UC盘：https://drive.uc.cn/s/126316a434e34
 
 https://tools.v1.mk/
 
-http://www.饭太硬.com/tv
+http://www.饭太硬.cc/tv
 
 https://肥猫.com
 
