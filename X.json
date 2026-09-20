@@ -1,14 +1,14 @@
 {
-"spider":"./jar/dummy.jar;md5;1fb3e6dd311c1203c034963e0cf4e1be", 
+"spider":"./jar/dummy.jar;md5;7be82cf9f66e0070ed430fd7b2d2ba64", 
 "wallpaper":"https://imgs.catvod.com","logo":"https://cnb.cool/junchao.tang/jtv/-/git/raw/main/Pictures/junmeng.gif",
 
 "sites": [
-{"key":"瓜子子","name": "🥭┆瓜子┆影视","type": 3,"api": "./py/guazi新.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
 //{"key":"裤佬豆瓣片单","name":"🐮┆豆瓣┆跑马灯","type":3,"api":"csp_Douban","jar":"./jar/跑马灯.jar","searchable": 1,"quickSearch":0,"filterable": 1,"ext":"./jar/跑马灯.txt"},
 {"key":"a玩偶","name":"🦸┆玩偶社┆饭硬‍","type":3,"api":"csp_WoGGGuard","timeout":30,"searchable":1,"quickSearch":1,"changeable":0,"jar":"./jar/custom_spider.jar","ext":{"Cloud-drive":"tvfan/Cloud-drive.txt"}},
 {"key":"玩偶","name":"🧸┆玩偶社┆二小","type":3,"api":"csp_AiNewWoggGuard","searchable":1,"quickSearch":1,"changeable":0},
 
 {"key":"剧透","name": "🍓┆剧透社┆影视","type": 3,"api": "./py/剧透社.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
+{"key":"瓜子子","name": "🥭┆瓜子┆影视","type": 3,"api": "./py/guazi新.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
 {"key":"新瓜子","name": "👠┆新瓜子┆影视","type": 3,"api": "./py/新瓜子.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
 //{"key": "金牌","name": "🎫┆金牌┆影视","type": 3,"api": "./js/金牌影视.js","searchable": 1,"quickSearch": 1,"filterable": 1,"switchable": 1},
 {"key":"骚火","name": "🔥┆骚火┆影视","type": 3,"api": "./py/骚火.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
@@ -27,8 +27,7 @@
 {"key":"橘汁","name": "🎉┆橘汁┆影视","type": 3,"api": "./py/橘汁视频.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
 {"key":"视觉","name": "🎉┆视觉┆影视","type": 3,"api": "./py/6080video.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
 {"key":"华谊","name": "🎉┆华谊┆影视","type": 3,"api": "./py/华谊影视.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
-//{"key":"youtube","name": "🎉┆youtube┆影视","type": 3,"api": "./py/youtube.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
-
+{"key":"金牌","name": "🎉┆金牌┆影视","type": 3,"api": "./py/金牌.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
 
 {"key":"duoduo","name": "🛳️┆多多┆影视","type": 3,"api": "./py/duoduo.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
 {"key":"hongguo","name": "🍟┆红果┆影视","type": 3,"api": "./py/hongguo.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
@@ -175,6 +174,7 @@
 
 //{"key": "csp_Dybj","name": "📚┆动态┆背景","type": 3,"api": "csp_ProxySpider","searchable": 0,"quickSearch": 0,"filterable": 0,"jar":"./jar/pro.jar","ext": {"class": "Dybj","ext": "1"}},
 //{"key": "csp_Dybjt","name": "📚┆动态┆背景t","type": 3,"api": "csp_ProxySpider","searchable": 0,"quickSearch": 0,"filterable": 0,"jar":"./jar/pro.jar","ext": {"class": "Dybjt","title_scale": 1.0,"font_scale": 1.0,"tmdb_key": "你的key"}},
+{"key":"AppleMusic","name":"🎵┆AppleMusic┆音乐html","type":3,"api":"csp_Emby","homePage":"https://alantang.serv00.net/html/AppleMusicTV.html"},
 {"key":"360聚合","name":"🎬┆360聚合┆影视html","type":3,"api":"csp_Emby","homePage":"https://alantang.serv00.net/html/360聚合.html"},
 {"key":"52tv","name":"📺┆52tv┆影视html","type":3,"api":"csp_Emby","homePage":"https://alantang.serv00.net/html/52tv.html"},
 {"key":"Eclipse","name":"🎵┆Eclipse┆影视html","type":3,"api":"csp_Emby","homePage":"https://alantang.serv00.net/html/Eclipse.html"},
