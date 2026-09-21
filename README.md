@@ -7,19 +7,19 @@
 👉所有以任何方式查看本仓库内容的人或直接或间接使用本仓库内容的使用者都应仔细阅读此声明。本仓库管理者保留随时更改或补充此免责声明的权利。一旦使用、复制、修改了本仓库内容，则视为您已接受此免责声明。</div>
 <br>
 <p align="center">
-  <a href="https://github.com/alantang1977/X/releases">
+  <a href="https://github.com/alantang1977/aj/releases">
     <img src="https://img.shields.io/github/v/release/alantang1977/X" />
   </a>
   <a href="https://www.python.org/">
     <img src="https://img.shields.io/badge/python-%20%3D%203.13-47c219" />
   </a>
-  <a href="https://github.com/alantang1977/X/releases">
-    <img src="https://img.shields.io/github/downloads/alantang1977/X/total" />
+  <a href="https://github.com/alantang1977/aj/releases">
+    <img src="https://img.shields.io/github/downloads/alantang1977/aj/total" />
   </a>
   <a href="https://github.com/alantang1977/X">
     <img src="https://img.shields.io/github/stars/alantang1977/X" />
   </a>
-  <a href="https://github.com/alantang1977/X/fork">
+  <a href="https://github.com/alantang1977/aj/fork">
     <img src="https://img.shields.io/github/forks/alantang1977/X" />
   </a>
 </p>
@@ -68,7 +68,7 @@ http://new.999888123.xyz (http://new.999888123.xyz/)
 http://new.999888987.xyz (http://new.999888987.xyz/)
 
 # 🏂影視TV🏄🏻 
-![tang](https://raw.githubusercontent.com/alantang1977/X/main/Pictures/Welcome.png)
+![tang](https://raw.githubusercontent.com/alantang1977/aj/main/Pictures/Welcome.png)
 
 ----
 
@@ -165,7 +165,7 @@ Demo🔗 https://live.fanmingming.cn/player/?vurl=https://0472.org/hls/cgtn.m3u8
 
 [回到顶部](#readme)
 
-![photo_2023-06-05_12-52-28](https://github.com/alantang1977/X/assets/107459091/a5062706-a6e9-4041-a9bf-5800f64efcad)
+![photo_2023-06-05_12-52-28](https://github.com/alantang1977/aj/assets/107459091/a5062706-a6e9-4041-a9bf-5800f64efcad)
 ------
 免费在线gif制作
 
@@ -211,8 +211,8 @@ https://www.tutieshi.com/
     https://mirror.ghproxy.com/https://raw.githubusercontent.com/
     Github RAW 加速服务
 
-    源码 https://gitcdn.top/https://github.com/alantang1977/X/raw/main/X.json
-    香港 https://raw.iqiq.io/alantang1977/X/main/X.json
+    源码 https://gitcdn.top/https://github.com/alantang1977/aj/raw/main/X.json
+    香港 https://raw.iqiq.io/alantang1977/aj/main/X.json
     新加坡 https://raw.kgithub.com/
     日本
     https://fastly.jsdelivr.net/gh/用户名/项目名@main/源文件.json
@@ -226,11 +226,11 @@ https://www.tutieshi.com/
     https://raw.githubusercontents.com/
 
     Github 静态加速
-    https://cdn.staticaly.com/gh/alantang1977/X/main/X.json
+    https://cdn.staticaly.com/gh/alantang1977/aj/main/X.json
 
     https://cdn.jsdelivr.net/gh/alantang1977/X@main/X.json
     
-    https://purge.jsdelivr.net/gh/alantang1977/X/main/X.json
+    https://purge.jsdelivr.net/gh/alantang1977/aj/main/X.json
 
 
 
@@ -242,7 +242,7 @@ https://www.tutieshi.com/
     https://streamtest.in
     https://iptv-org.github.io
 
-![photo_2024-02-09_16-28-41 (2)](https://github.com/alantang1977/X/assets/107459091/b4777a78-75bb-42ae-92ca-5ba6a2e23bf7)
+![photo_2024-02-09_16-28-41 (2)](https://github.com/alantang1977/aj/assets/107459091/b4777a78-75bb-42ae-92ca-5ba6a2e23bf7)
 
 ----
 
@@ -266,7 +266,7 @@ https://www.tutieshi.com/
 
 ------
 
-![photo_2024-02-09_16-28-42](https://github.com/alantang1977/X/assets/107459091/630ad497-6028-4dc0-981d-c083c462e051)
+![photo_2024-02-09_16-28-42](https://github.com/alantang1977/aj/assets/107459091/630ad497-6028-4dc0-981d-c083c462e051)
 
 # 👹安装教程/使用说明
 
@@ -287,7 +287,7 @@ https://www.tutieshi.com/
 > [280位token](https://messense-aliyundrive-webdav-backendrefresh-token-ucs0wn.streamlit.app/)
 
 
-![photo_2023-06-06_07-15-35](https://github.com/alantang1977/X/assets/107459091/59c22c29-4bbb-4ae9-8bce-f18d41833e13)
+![photo_2023-06-06_07-15-35](https://github.com/alantang1977/aj/assets/107459091/59c22c29-4bbb-4ae9-8bce-f18d41833e13)
 
 ----
 
@@ -301,7 +301,7 @@ https://www.tutieshi.com/
     https://unsplash.com/
     https://bz.zzzmh.cn/index
 
-![Robot](https://github.com/alantang1977/X/assets/107459091/84793476-42d4-494f-87e4-19d19b271a64)
+![Robot](https://github.com/alantang1977/aj/assets/107459091/84793476-42d4-494f-87e4-19d19b271a64)
 ------
 ## 🥼本地接口源教程
 
@@ -309,7 +309,7 @@ https://www.tutieshi.com/
 
 2.影视 file://tvboxqy/tang.json
 
-![image](https://github.com/alantang1977/X/assets/107459091/f65e8c22-c521-4a3c-9ccd-ac5b17d43bcb)
+![image](https://github.com/alantang1977/aj/assets/107459091/f65e8c22-c521-4a3c-9ccd-ac5b17d43bcb)
 
 ----
 
@@ -323,7 +323,7 @@ https://www.tutieshi.com/
 ------
 # 思维没有边界 一切皆有可能
 ------
-![photo_2024-03-13_08-34-23](https://github.com/alantang1977/X/assets/107459091/b27d54cc-659a-403d-acd9-b56b3f831d64)
+![photo_2024-03-13_08-34-23](https://github.com/alantang1977/aj/assets/107459091/b27d54cc-659a-403d-acd9-b56b3f831d64)
 
 ----
 
@@ -357,7 +357,7 @@ https://www.tutieshi.com/
 
 https://ghproxy.com/https://raw.githubusercontent.com/Vivo-Max/XYQTVBox/main/XYQTVBox.json
 
-![pexels-quang-nguyen-vinh-2131623](https://github.com/alantang1977/X/assets/107459091/63d15301-566f-493f-bd9d-5db74bd5d368)
+![pexels-quang-nguyen-vinh-2131623](https://github.com/alantang1977/aj/assets/107459091/63d15301-566f-493f-bd9d-5db74bd5d368)
 
 ------
     2.唐三：
@@ -408,7 +408,7 @@ https://www.metools.info/other/o21.html
 
     配置:http://肥猫.love
 
-    配置:http://饭太硬.ga/x/o.json
+    配置:http://饭太硬.ga/aj/o.json
 
     唐三配置接口:https://hutool.ml/tang
 
@@ -424,7 +424,7 @@ https://www.metools.info/other/o21.html
 
     配置:https://maoyingshi.cc/tvbox/云星日记/1.m3u8
 
-![2202_2012102321380600_超人哥哥](https://github.com/alantang1977/X/assets/107459091/6479c06d-33ce-4824-b272-44feafd5e915)
+![2202_2012102321380600_超人哥哥](https://github.com/alantang1977/aj/assets/107459091/6479c06d-33ce-4824-b272-44feafd5e915)
 
 ------
 随机轮换壁纸：
@@ -437,7 +437,7 @@ https://www.metools.info/other/o21.html
 ## http://img.fongmi.eu.org
 ## https://jianbian.chuqiuyu.workers.dev/
 
-![2700_2013040313000400_IMG_0164](https://github.com/alantang1977/X/assets/107459091/912df5d9-da50-479f-88f9-92adfc74429b)
+![2700_2013040313000400_IMG_0164](https://github.com/alantang1977/aj/assets/107459091/912df5d9-da50-479f-88f9-92adfc74429b)
 
 软件架构
 
@@ -455,9 +455,9 @@ https://www.metools.info/other/o21.html
     长老接口 例👉 http://ewwe.ml/tstv
     http://ewwe.ml/你的短址(或随机四位短址)
 
-![2701_2013040313000500_IMG_0165](https://github.com/alantang1977/X/assets/107459091/61b602c7-9cb6-4f0e-9554-6c71d316438d)
+![2701_2013040313000500_IMG_0165](https://github.com/alantang1977/aj/assets/107459091/61b602c7-9cb6-4f0e-9554-6c71d316438d)
 
-![f3pJ5nzM-wallha com](https://github.com/alantang1977/X/assets/107459091/69ed789a-7ad9-4a83-a54c-b46c26550742)
+![f3pJ5nzM-wallha com](https://github.com/alantang1977/aj/assets/107459091/69ed789a-7ad9-4a83-a54c-b46c26550742)
 
 
     国内代理方式： 原地址：https://raw.iqiq.io/(https://github.com/alantang1977/T/blob/master/TangTV.json)
@@ -503,6 +503,6 @@ https://emoji6.com/emojiall/
     图标网址
     https://www.iconfinder.com/search?q=tv
 
-![pexels-pixabay-210186](https://github.com/alantang1977/X/assets/107459091/a3948131-dc5f-4089-805a-272248a98b82)
+![pexels-pixabay-210186](https://github.com/alantang1977/aj/assets/107459091/a3948131-dc5f-4089-805a-272248a98b82)
 
 [回到顶部](#readme)
