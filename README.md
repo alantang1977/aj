@@ -8,7 +8,7 @@
 <br>
 <p align="center">
   <a href="https://github.com/alantang1977/aj/releases">
-    <img src="https://img.shields.io/github/v/release/alantang1977/X" />
+    <img src="https://img.shields.io/github/v/release/alantang1977/aj" />
   </a>
   <a href="https://www.python.org/">
     <img src="https://img.shields.io/badge/python-%20%3D%203.13-47c219" />
@@ -16,11 +16,11 @@
   <a href="https://github.com/alantang1977/aj/releases">
     <img src="https://img.shields.io/github/downloads/alantang1977/aj/total" />
   </a>
-  <a href="https://github.com/alantang1977/X">
-    <img src="https://img.shields.io/github/stars/alantang1977/X" />
+  <a href="https://github.com/alantang1977/aj">
+    <img src="https://img.shields.io/github/stars/alantang1977/aj" />
   </a>
   <a href="https://github.com/alantang1977/aj/fork">
-    <img src="https://img.shields.io/github/forks/alantang1977/X" />
+    <img src="https://img.shields.io/github/forks/alantang1977/aj" />
   </a>
 </p>
 
@@ -50,6 +50,17 @@ UC盘：https://drive.uc.cn/s/126316a434e34
 https://tools.v1.mk/
 
 http://www.饭太硬.cc/tv
+
+摸鱼主接口：
+http://www.y456y.com
+
+http://fish.y456y.com
+
+摸鱼备用接口：
+一
+http://我不是.摸鱼儿.cc
+二
+http://我不是.摸鱼儿.top
 
 https://肥猫.com
 
