@@ -1,12 +1,12 @@
 {
-"spider":"./jar/dummy.jar;md5;7be82cf9f66e0070ed430fd7b2d2ba64", 
+"spider":"./jar/dummy.jar;md5;4fcff3209276d2776d3f320474751453", 
 "wallpaper":"https://imgs.catvod.com","logo":"https://cnb.cool/junchao.tang/jtv/-/git/raw/main/Pictures/junmeng.gif",
 
 "sites": [
 //{"key":"裤佬豆瓣片单","name":"🐮┆豆瓣┆跑马灯","type":3,"api":"csp_Douban","jar":"./jar/跑马灯.jar","searchable": 1,"quickSearch":0,"filterable": 1,"ext":"./jar/跑马灯.txt"},
 {"key":"a玩偶","name":"🦸┆玩偶社┆饭硬‍","type":3,"api":"csp_WoGGGuard","timeout":30,"searchable":1,"quickSearch":1,"changeable":0,"jar":"./jar/custom_spider.jar","ext":{"Cloud-drive":"tvfan/Cloud-drive.txt"}},
 {"key":"玩偶","name":"🧸┆玩偶社┆二小","type":3,"api":"csp_AiNewWoggGuard","searchable":1,"quickSearch":1,"changeable":0},
-
+{"key": "极速追剧","name": "🏰️️┆极速剧┆追剧","type": 3,"api": "./js/极速追剧.js","changeable": 0,"filterable": 1},
 {"key":"剧透","name": "🍓┆剧透社┆影视","type": 3,"api": "./py/剧透社.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
 {"key":"瓜子子","name": "🥭┆瓜子┆影视","type": 3,"api": "./py/guazi新.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
 {"key":"新瓜子","name": "👠┆新瓜子┆影视","type": 3,"api": "./py/新瓜子.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
