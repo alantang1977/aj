@@ -229,9 +229,9 @@
 {"name": "🛳️️┆裤佬「仅移动网」","type":0,"url":"https://iptv.445569.xyz/live.m3u","ua":"okHttp","timeout":10,"playerType":2},
 	
 {"name": "🐍┆易发港🇭🇰澳「直播」","type": 0,"ua": "okhttp/3.15","url": "http://tvv.tw/github.com/fafa002/yf2025/raw/main/yiyifafa.txt"},
-{"name": "🦋┆央卫TV「直播」","type": 0,"ua": "","url": "./py/ysp-live.py"},
-{"api": "./py/yangshipin.py","ext": {},"name": "📺┆央视频「测试直播」"},
 
+{"api": "./py/yangshipin.py","ext": {},"name": "📺┆央视频「测试直播」"},
+{"api": "./py/ysp-live.py","ext": {},"name": "🦋┆央卫TV「直播」"},
 {"name": "📺┆央视频「高清直播」","type": 3,"api": "./py/ysp-fongmi.py","url": "ysp://all","ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"},
 
 
