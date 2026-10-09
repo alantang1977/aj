@@ -29,33 +29,6 @@ ext 可选：
   cast_entries    true 时直播源 M3U 也导出投屏条目（默认 false，只出源1）
   live_mode       proxy(默认) 走代理滚动缓冲；redirect 直接 302 到官方 m3u8，
                   省掉握手等待（投屏源必须带签名头，会自动退回 proxy）
-  resp_style      list(默认) = [code, type, content, headers]；map 则返回 dict，
-                  适配要求 Map 的壳（两种都会把状态码钳成合法值，避免 Status 为 null）
-  b64_body        true 时切片 body 走 base64 字符串，排查跨语言桥传不了二进制用
-  no_proxy        true = 只走直连，拿不到官方地址就放弃播放（完全不碰本地代理，
-                  用来确认崩溃是不是 NanoHTTPD 那条链路引起的）
-  direct_wait     直连取址最多等几秒，默认 6（live_mode=redirect 时自动启用直连）
-  ts_timeout      切片回源超时，默认 8（压低可避免壳代理超时走异常分支）
-  cast_direct     true(默认) 高码也直连：投屏节点要签名头时，把 UID/APPSIGN 等
-                  放进 header 交给播放器透传。若播放器不带 header 导致 403，设 false
-  cast_m3u        true 时直播 M3U 在直连模式下也导出高码条目。M3U 没法带 header，
-                  多半 403，默认 false（走代理模式时不受此限制）
-  ts_direct       true(默认) 播放列表里直接写官方切片地址，播放器直连 CDN。
-                  把代理调用从"每片一次"压到"每刷新周期一次"。设 false 退回全代理
-  prefer_proxy    true = 强制只走本地代理，不尝试直连（默认 false = 直连优先）
-  heavy_direct    true(默认) CCTV-4K/8K/16-4K 整条链路强制直连：这三个台码率高、
-                  切片能到几十 MB，一次都不要过跨语言桥
-  ts_max_mb       代理切片体积上限(MB)，默认 16。超限拒绝并把该台标记为必须直连，
-                  兜住 ts_direct 没生效的情况
-
-  serial          true = 串行处理代理请求，排查并发打爆 Python 桥；会变慢，仅排查用
-  proxy_timeout   代理硬超时(秒)，默认 6；超时自己回合法 503，不让壳的网络层
-                  超时走异常分支（那条分支很可能就是 status=null 的来源）。0=关闭
-
-  崩溃排查顺序（壳报 "Status can't be null" 时）：
-  1) 加 "no_proxy": true —— 不崩说明问题在本地代理链路，保持直连即可
-  2) 仍崩 —— 加 "live_mode": "redirect"，并确认不是播放器/内核自身的问题
-  3) 仍崩 —— 加 "serial": true 排除并发；再不行加 "b64_body": true
   cast_timeout / cast_insecure / cast_cache_ttl / cast_interval / cast_jitter
   cast_session_ttl / cast_heartbeat / cast_links / cast_persist / cast_device_json
 
@@ -112,6 +85,33 @@ IDLE_TIMEOUT = 300
 MAX_SEGS = 400
 PLAYLIST_WINDOW = 8
 HTTP_TIMEOUT = 12
+
+# 壳端(FongMi 5.1.6 / VodPlus 1.2.1)的 Proxy.createResponse 直接拿 status 做
+# NanoHTTPD Status.lookup()，lookup 不认识的码(如 502/599)返回 null，
+# Response.send 抛 "Status can't be null" 导致整个 app 闪退。
+# 这里维护设备端 Status 枚举的合法码表，出站回包统一收敛。
+_SAFE_STATUS = {101, 200, 201, 202, 204, 206, 207,
+                301, 302, 303, 304, 307,
+                400, 401, 403, 404, 405, 406, 408, 409, 410, 411, 412, 413,
+                415, 416, 417, 429, 500, 501, 503, 505}
+
+
+def _proxy_safe(resp):
+    """把 localProxy 回包收敛成壳端一定认识的 [status, mime, body, headers?]。"""
+    if not isinstance(resp, (list, tuple)) or not resp:
+        return [500, "text/plain; charset=utf-8", "央视频: 非法代理返回"]
+    try:
+        status = int(resp[0])
+    except (TypeError, ValueError):
+        status = 500
+    if status not in _SAFE_STATUS:
+        status = 500
+    mime = resp[1] if len(resp) > 1 and resp[1] else "text/plain; charset=utf-8"
+    body = resp[2] if len(resp) > 2 and resp[2] is not None else ""
+    out = [status, mime, body]
+    if len(resp) > 3 and resp[3]:
+        out.append(resp[3])
+    return out
 
 
 # ================================================================ JCE 协议
@@ -771,33 +771,6 @@ def _url_host(url):
         return urllib.parse.urlsplit(url).hostname or ''
     except ValueError:
         return ''
-
-
-# 运行时判定为"大切片"的频道：代理真去拉切片且超过阈值时自动登记，
-# 之后该频道一律强制直连，不再往跨语言桥里塞大对象
-_HEAVY_RUNTIME = set()
-_HEAVY_LOCK = threading.Lock()
-
-
-def _mark_heavy(slug):
-    with _HEAVY_LOCK:
-        _HEAVY_RUNTIME.add(_base_slug(slug or ''))
-
-
-def _is_heavy(slug):
-    """这个频道的切片是不是大到不该经过跨语言桥。
-
-    4K/8K 频道的码率比 1080p 高一个量级：同样的切片时长，切片体积能到几十 MB。
-    localProxy 必须一次性把整个 body 交回壳（没有流式接口），
-    Chaquopy 要把它拷成 Java 对象再转 InputStream，大对象极易 OOM / 超时，
-    壳的 NanoHTTPD 拿不到有效响应就走异常分支 —— 表现就是 "Status can't be null"。
-    所以这几个台必须整条链路直连，一个字节都别过 Python。
-    """
-    base = _base_slug(slug or '')
-    if base in TRUE_4K_CHANNELS:
-        return True
-    with _HEAVY_LOCK:
-        return base in _HEAVY_RUNTIME
 
 
 _CAST_CLIENT = None
@@ -2240,9 +2213,9 @@ class _Net(object):
             except urllib.error.HTTPError as error:
                 return self._http_error(error)
             except Exception as error:
-                return 502, ("%s(SSL降级): %s" % (type(error).__name__, error)).encode("utf-8"), {}
+                return 599, ("%s(SSL降级): %s" % (type(error).__name__, error)).encode("utf-8"), {}
         except Exception as error:
-            return 502, ("%s: %s" % (type(error).__name__, error)).encode("utf-8"), {}
+            return 599, ("%s: %s" % (type(error).__name__, error)).encode("utf-8"), {}
 
 
 DIRECT = False
@@ -2264,46 +2237,6 @@ def _one(value):
 def _safe(value):
     """M3U 属性里不能出现双引号。"""
     return str(value).replace('"', "'")
-
-
-# ---------------- 代理出口规范化 ----------------
-# 壳的本地服务是 NanoHTTPD，它只认标准 HTTP 状态码：一旦拿到 599 / 0 / None 之类，
-# Response.Status.lookup() 返回 null，播放器来取流时就会在 Response.send() 抛
-# "Status can't be null" 把整个壳打崩。所以 localProxy 的所有返回都过一遍这里，
-# 保证：状态码合法且非 null、body 不为 None、headers 恒为 {str: str}、始终 4 元素。
-_SAFE_CODES = (200, 204, 206, 301, 302, 303, 304, 307,
-               400, 401, 403, 404, 405, 408, 416, 429,
-               500, 501, 502, 503, 504)
-
-
-def _norm_resp(result, style="list", b64=False):
-    try:
-        code, ctype, content = result[0], result[1], result[2]
-        headers = result[3] if len(result) > 3 else None
-    except Exception:
-        code, ctype, content, headers = 502, "text/plain; charset=utf-8", "央视频: 非法代理返回", None
-    try:
-        code = int(code)
-    except (TypeError, ValueError):
-        code = 502
-    if code not in _SAFE_CODES:
-        code = 502 if code >= 400 else 200
-    if content is None:
-        content = ""
-    ctype = str(ctype or "text/plain; charset=utf-8")
-    safe = {}
-    for key, value in (headers or {}).items():
-        if value is None:
-            continue
-        safe[str(key)] = str(value)
-    if code in (301, 302, 303, 307) and not safe.get("Location"):
-        code, ctype, content = 502, "text/plain; charset=utf-8", "央视频: 跳转缺少 Location"
-    if b64 and isinstance(content, (bytes, bytearray)):
-        safe["Content-Transfer-Encoding"] = "base64"
-        content = base64.b64encode(bytes(content)).decode("ascii")
-    if str(style).lower() == "map":
-        return {"code": code, "type": ctype, "content": content, "headers": safe}
-    return [code, ctype, content, safe]
 
 
 # ================================================================ 分类 / EPG
@@ -2389,30 +2322,25 @@ def _live_entries(include_cast=True):
     return out
 
 
-def _upstream_entry(ch, allow_signed=False):
-    """拿到官方可直接播放的 m3u8 地址 + 该地址需要的请求头。
+def _upstream_url(ch):
+    """拿到官方可直接播放的 m3u8 地址（不改切片、不经过代理）。
 
-    返回 (url, headers)。投屏源落在 liveali / liveten 这类 CDN 上时，播放列表和
-    切片都要带 UID / APPSIGN 等签名头；以前碰到这种节点就直接放弃直连退回代理，
-    高码在 no_proxy 下于是整条失效。现在改成把签名头一并返回，交给播放器带上去
-    （TVBox 系壳会把 playerContent 的 header 透传给播放器，子请求也会带）。
-    allow_signed=False 时保持旧行为：需要签名头就返回空地址。
+    bk 优先取回源列表第一条，取不到再试 JCE；两个都失败返回空，由调用方退回代理滚动缓冲。
+    投屏源只有不需要签名头的节点才能 302，否则播放器直连会丢头，退回代理。
     """
     if ch.mode == 'cast':
         try:
             entry = CAST.resolve(_base_slug(ch.slug))
         except Exception as error:
             _log('%s cast upstream failed: %s' % (ch.slug, error))
-            return '', {}
+            return ''
         if not entry.final_url:
-            return '', {}
-        host = entry.final_host or _url_host(entry.final_url)
-        if _needs_signed_headers(host) and not allow_signed:
-            _log('%s cast node %s needs signed headers, skip direct' % (ch.slug, host))
-            return '', {}
-        return entry.final_url, dict(entry.playback_headers or {})
+            return ''
+        if _needs_signed_headers(entry.final_host or _url_host(entry.final_url)):
+            return ''
+        return entry.final_url
     if not (ch.sid and ch.pid):
-        return '', {}
+        return ''
     now = int(time.time())
     for mode in (('bk', 'jce') if ch.mode == 'bk' else ('jce', 'bk')):
         try:
@@ -2420,17 +2348,12 @@ def _upstream_entry(ch, allow_signed=False):
                 urls = bk_playurls(ch.sid, ch.pid, ch.defn)
                 for u in urls:
                     if u:
-                        return u, {}
+                        return u
             else:
-                return (jce_timeshift_url(ch.pid, ch.sid, now - WINDOW, now, ch.defn), {})
+                return jce_timeshift_url(ch.pid, ch.sid, now - WINDOW, now, ch.defn)
         except Exception as error:
             _log('%s upstream %s failed: %s' % (ch.slug, mode, error))
-    return '', {}
-
-
-def _upstream_url(ch, allow_signed=False):
-    """只要地址、不要请求头的场合（302 跳转等）用这个。"""
-    return _upstream_entry(ch, allow_signed)[0]
+    return ''
 
 
 class _TsCache(object):
@@ -2504,38 +2427,6 @@ class Spider(SpiderBase):
         self.holdback = 1
         self.cast_entries = False
         self.live_mode = "proxy"
-        # 代理出口形态：list = [code, type, content, headers]（多数壳）；
-        # 若壳要求 Map，把 ext 的 resp_style 设成 map
-        self.resp_style = "list"
-        # 少数壳的跨语言桥传不了二进制 body，切片会解析失败，可设 b64_body=true 排查
-        self.b64_body = False
-        # 代理硬超时（秒）：0=关闭。开一个值可避免壳网络层超时走异常分支
-        self.proxy_timeout = 6.0
-        # 高码直连：投屏节点常要签名头，靠播放器透传 header 直连（默认开）。
-        # 若你的播放器不带 header 导致 403，设成 false 退回旧行为。
-        self.cast_direct = True
-        # 切片直连：播放列表里直接写官方切片地址，播放器自己去 CDN 拉。
-        # 把代理调用从"每片一次"压到"每个刷新周期一次"，是崩溃的最大放大器。
-        self.ts_direct = True
-        # 强制只走代理（默认 false = 直连优先，取不到才回落代理）
-        self.prefer_proxy = False
-        # 4K/8K 整条链路强制直连（默认开）。这几个台切片太大，过桥必崩
-        self.heavy_direct = True
-        # 代理切片体积上限(MB)，超过就拒绝并把这个台标记为"必须直连"
-        self.ts_max_mb = 16.0
-        # 直播 M3U 里要不要导出高码条目。M3U 没法带 header，直连模式下多半 403，
-        # 所以默认关闭；确认播放器支持再开。
-        self.cast_m3u = False
-        # 直连优先：playerContent 里同步等这么久拿官方地址，拿到就交给播放器直连，
-        # 完全不经过本地代理（NanoHTTPD 那条链路是崩溃高发区）
-        self.direct_wait = 6.0
-        # 硬开关：宁可播放失败也不碰本地代理
-        self.no_proxy = False
-        # 切片回源超时，压低避免壳的代理请求超时后走异常分支
-        self.ts_timeout = 8.0
-        # 串行化代理请求（并发打爆 Python 桥时的排查开关）
-        self.serial = False
-        self._proxy_gate = threading.Lock()
 
     # ---------------- 生命周期 ----------------
     def getName(self):
@@ -2560,43 +2451,17 @@ class Spider(SpiderBase):
             self.epg_ids = {str(k): str(v) for k, v in opts["epg_ids"].items()}
         self.logo_mode = str(opts.get("logo_mode") or "direct").lower()
         self.live_mode = str(opts.get("live_mode") or "proxy").lower()
-        self.resp_style = str(opts.get("resp_style") or "list").lower()
-        self.b64_body = bool(opts.get("b64_body", False))
-        try:
-            self.proxy_timeout = max(0.0, min(30.0, float(opts.get("proxy_timeout", 6.0) or 0)))
-        except (TypeError, ValueError):
-            self.proxy_timeout = 6.0
-        self.serial = bool(opts.get("serial", False))
-        self.no_proxy = bool(opts.get("no_proxy", False))
-        self.cast_direct = bool(opts.get("cast_direct", True))
-        self.cast_m3u = bool(opts.get("cast_m3u", False))
-        self.ts_direct = bool(opts.get("ts_direct", True))
-        self.prefer_proxy = bool(opts.get("prefer_proxy", False))
-        self.heavy_direct = bool(opts.get("heavy_direct", True))
-        try:
-            self.ts_max_mb = max(0.0, min(256.0, float(opts.get("ts_max_mb", 16.0) or 0)))
-        except (TypeError, ValueError):
-            self.ts_max_mb = 16.0
-        try:
-            self.direct_wait = max(0.0, min(15.0, float(opts.get("direct_wait") or 6)))
-        except (TypeError, ValueError):
-            self.direct_wait = 6.0
-        try:
-            self.ts_timeout = max(3.0, min(20.0, float(opts.get("ts_timeout") or 8)))
-        except (TypeError, ValueError):
-            self.ts_timeout = 8.0
         # 直播列表由点播列表生成，投屏分类在点播里默认就在，这里默认同样带上，保持一致
         self.cast_entries = bool(opts.get("cast_entries", True))
         DIRECT = bool(opts.get("direct", False))
         try:
-            # 默认压到 8 秒：壳的代理请求常有 10s 超时，等过头壳会走异常分支
-            self.wait = max(0.0, min(15.0, float(opts.get("wait") or 8)))
+            self.wait = max(3.0, float(opts.get("wait") or 12))
         except (TypeError, ValueError):
-            self.wait = 8.0
+            self.wait = 12.0
         try:
-            self.cast_wait = max(0.0, min(15.0, float(opts.get("cast_wait") or 12)))
+            self.cast_wait = max(3.0, float(opts.get("cast_wait") or 20))
         except (TypeError, ValueError):
-            self.cast_wait = 12.0
+            self.cast_wait = 20.0
         try:
             self.holdback = max(0, int(opts.get("holdback") or 1))
         except (TypeError, ValueError):
@@ -2627,8 +2492,12 @@ class Spider(SpiderBase):
     def manualVideoCheck(self):
         return False
 
+    def action(self, action):
+        # 部分壳（TVBox/fongmi/OK影视）初始化时会调用 action，返回 dict 即可
+        return {}
+
     # ---------------- 入口 ----------------
-    def homeContent(self, filter):
+    def homeContent(self, filter=None):
         classes = [{"type_id": "all", "type_name": "全部频道"}]
         for key, name in (("cctv", "央视频道"), ("satellite", "卫视频道"),
                           ("cgtn", "CGTN"), ("4k", "4K超清"),
@@ -2679,16 +2548,6 @@ class Spider(SpiderBase):
             "vod_play_from": play_from,
             "vod_play_url": play_url,
         }]}
-        desc = desc.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        return {"list": [{
-            "vod_id": slug, "vod_name": info["name"],
-            "vod_pic": self._logo(base, info["name"]),
-            "vod_actor": self.brandActor, "vod_director": self.brandDirector,
-            "vod_remarks": "央视频 | 直播",
-            "vod_content": desc,
-            "vod_play_from": "$$$".join(parts_from),
-            "vod_play_url": "$$$".join(parts_url),
-        }]}
 
     def searchContent(self, key, quick, pg="1"):
         keyword = (key or "").strip().lower()
@@ -2707,58 +2566,18 @@ class Spider(SpiderBase):
         ch = CHANNEL_STATE.get(slug)
         if ch is None:
             return {"parse": 0, "playUrl": "", "url": "", "header": {}}
-        # 直连模式下代理不参与，预热代理缓存纯属白跑
-        if not (self.no_proxy or self.live_mode == "redirect"):
-            self._warm(slug)
+        self._warm(slug)
         header = {"User-Agent": UA, "Referer": "https://live.cctv.cn/"}
         if ch.mode == "cast":
             header = dict(ch.headers or header)
-        # 直连优先：能拿到官方地址就直接交给播放器，让它自己去 CDN 拉，
-        # 本地代理（NanoHTTPD → localProxy）这条链路一次都不走。
-        # 取不到才回落代理（prefer_proxy=true 可强制只走代理）。
-        if not getattr(self, "prefer_proxy", False):
-            # 投屏握手比源1慢很多，给足时间，否则 6 秒不够直接判失败
-            budget = self.cast_wait if ch.mode == "cast" else self.direct_wait
-            # 4K/8K 切片过大，代理扛不住，多给点时间也要拿到直连地址
-            if getattr(self, "heavy_direct", True) and _is_heavy(slug):
-                budget = max(budget, 12.0)
-            url, extra = self._await_upstream(ch, budget)
-            if url:
-                if extra:
-                    header = dict(header)
-                    header.update(extra)
-                _log('%s direct play -> %s (headers=%d)'
-                     % (slug, url[:80], len(extra or {})))
-                return {"parse": 0, "playUrl": "", "url": url, "header": header}
-            if self.no_proxy:
-                _log('%s no_proxy: 取不到直连地址，放弃' % slug)
-                return {"parse": 0, "playUrl": "", "url": "", "header": header}
+            if self.live_mode == "redirect" and _upstream_url(ch):
+                # 直连会丢签名头，只有无需签名的 CDN 才走 302
+                pass
         return {
             "parse": 0, "playUrl": "",
             "url": self._purl(slug=slug),
             "header": header,
         }
-
-    def _await_upstream(self, ch, timeout):
-        """后台线程取官方地址 + 请求头，最多等 timeout 秒。
-
-        返回 (url, headers)。放后台是为了能限时；取址本身可能卡在握手上，
-        直接在当前线程调用会把壳的播放线程拖死。
-        """
-        box = {}
-
-        def work():
-            try:
-                url, extra = _upstream_entry(ch, getattr(self, "cast_direct", True))
-                box["r"] = (url or "", extra or {})
-            except Exception as error:
-                box["r"] = ("", {})
-                _log('%s direct url failed: %s' % (ch.slug, error))
-
-        thread = threading.Thread(target=work, daemon=True)
-        thread.start()
-        thread.join(max(0.0, float(timeout or 0)))
-        return box.get("r") or ("", {})
 
     # ---------------- 直播源 M3U ----------------
     def liveContent(self, url=""):
@@ -2768,11 +2587,7 @@ class Spider(SpiderBase):
             lines = ["#EXTM3U"]
         # 直播列表直接由点播列表生成：点播「全部频道」+ 点播「央视高码」分类，
         # 两边共用 _entries()，频道集合、顺序、分组永远一致。
-        direct = self.live_mode == "redirect" or getattr(self, "no_proxy", False)
-        # M3U 是纯文本，没有地方带请求头，所以直连模式下导出高码条目基本必 403，
-        # 默认不导出（cast_m3u=true 可强制导出）。走代理时不受影响。
-        include_cast = self.cast_entries and (self.cast_m3u or not direct)
-        for item in _live_entries(include_cast):
+        for item in _live_entries(self.cast_entries):
             slug, name = item['slug'], item['name']
             if item['cast']:
                 name = name + " (投屏)"
@@ -2781,12 +2596,7 @@ class Spider(SpiderBase):
         return "\n".join(lines) + "\n"
 
     def _play_url(self, slug):
-        # 直播源 M3U 是静态文本，没法延迟取址，所以 no_proxy 在这里等价于
-        # redirect：代理只回 302 + 空 body，不经过二进制切片那条链路。
-        # 4K/8K 同理：切片太大，M3U 里也必须让播放器直连官方地址。
-        if self.live_mode == "redirect" or getattr(self, "no_proxy", False):
-            return self._purl(slug=slug, mode="redirect")
-        if getattr(self, "heavy_direct", True) and _is_heavy(slug):
+        if self.live_mode == "redirect":
             return self._purl(slug=slug, mode="redirect")
         return self._purl(slug=slug)
 
@@ -2800,44 +2610,21 @@ class Spider(SpiderBase):
 
     # ---------------- 本地代理（取代本地 HTTP 服务） ----------------
     def localProxy(self, param):
-        style = getattr(self, "resp_style", "list")
-        b64 = getattr(self, "b64_body", False)
-        # 硬超时：绝不让壳等太久。壳的网络层超时后走的是异常分支，
-        # 那条分支很可能就是 status=null 的来源，所以宁可自己回一个合法的 503。
-        timeout = float(getattr(self, "proxy_timeout", 0.0) or 0.0)
-        box = {}
+        # 统一走 raw 实现，再收敛成壳端认识的状态码，避免 Status null 闪退
+        return _proxy_safe(self._localProxyRaw(param))
 
-        def work():
-            try:
-                if getattr(self, "serial", False):
-                    # 播放器会并发拉多个切片，某些壳的 Python 桥扛不住并发，
-                    # 串行化可以确认崩溃是不是并发导致的（会慢，仅排查用）
-                    with self._proxy_gate:
-                        box["r"] = self._localProxy(param)
-                else:
-                    box["r"] = self._localProxy(param)
-            except Exception as error:
-                _log('localProxy crash: %s: %s' % (type(error).__name__, error))
-                box["r"] = [502, "text/plain; charset=utf-8",
-                            "央视频: %s: %s" % (type(error).__name__, error)]
-
-        if timeout <= 0:
-            work()
-            return _norm_resp(box.get("r"), style, b64)
-        thread = threading.Thread(target=work, daemon=True)
-        thread.start()
-        thread.join(timeout)
-        result = box.get("r")
-        if result is None:
-            _log('localProxy timeout > %.0fs' % timeout)
-            result = [503, "text/plain; charset=utf-8",
-                      "央视频: 代理超时 (>%.0fs)" % timeout]
-        return _norm_resp(result, style, b64)
-
-    def _localProxy(self, param):
+    def _localProxyRaw(self, param):
         try:
+            # 部分壳传 JSON 字符串而非 dict，先归一化
+            if isinstance(param, str):
+                try:
+                    param = json.loads(param)
+                except ValueError:
+                    param = {}
+            if not isinstance(param, dict):
+                param = {}
             query = {}
-            for key, value in (param or {}).items():
+            for key, value in param.items():
                 query[str(key)] = _one(value)
             kind = query.get("type", "")
             if kind == "diag":
@@ -2851,7 +2638,7 @@ class Spider(SpiderBase):
                 return [404, "text/plain; charset=utf-8", "央视频: 未知频道 " + slug]
             if query.get("seq"):
                 return self._chunk(ch, query["seq"])
-            want_redirect = self.live_mode == "redirect" or getattr(self, "no_proxy", False)
+            want_redirect = self.live_mode == "redirect"
             if query.get("mode") == "redirect":
                 want_redirect = True
             elif query.get("mode") == "proxy":
@@ -2863,7 +2650,7 @@ class Spider(SpiderBase):
                             {"Location": direct, "Cache-Control": "no-store"}]
             return self._playlist(ch)
         except Exception as error:
-            return [502, "text/plain; charset=utf-8",
+            return [500, "text/plain; charset=utf-8",
                     "央视频: %s: %s" % (type(error).__name__, error)]
 
     def _playlist(self, ch):
@@ -2920,36 +2707,13 @@ class Spider(SpiderBase):
                "#EXT-X-MEDIA-SEQUENCE:%d" % window[0][0],
                "#EXT-X-DISCONTINUITY-SEQUENCE:0",
                "#EXT-X-START:TIME-OFFSET=-15.0"]
-        for seq, dur, pdt, url in window:
+        for seq, dur, pdt, _url in window:
             if pdt:
                 out.append("#EXT-X-PROGRAM-DATE-TIME:" + pdt)
             out.append("#EXTINF:%.3f," % dur)
-            out.append(self._ts_url(ch, seq, url))
+            out.append(self._purl(slug=ch.slug, seq=seq))
         return [200, "application/vnd.apple.mpegurl", "\n".join(out) + "\n",
                 {"Cache-Control": "no-cache, no-store"}]
-
-    def _ts_url(self, ch, seq, direct_url):
-        """播放列表里这一片用什么地址。
-
-        ts_direct=true(默认) 时直接写官方绝对地址，播放器自己去 CDN 拉。
-        这是崩溃放大器所在：切片全走代理的话，一次刷新会产生几十到几百次
-        localProxy 调用，而壳的 Python 桥每多调一次就多一次踩雷机会；改成
-        直连后，代理在一个刷新周期里只被请求一次（拿播放列表）。
-        需要签名头的 CDN 除外——播放器直连切片会丢头，仍走代理。
-        """
-        proxied = self._purl(slug=ch.slug, seq=seq)
-        if not direct_url:
-            return proxied
-        if not getattr(self, "ts_direct", True):
-            return proxied or direct_url
-        # 4K/8K：哪怕切片要签名头也必须直连。签名头已经通过 playerContent 的
-        # header 交给播放器了（壳会把它套用到该 playlist 下的所有子请求），
-        # 而几十 MB 的切片过一次跨语言桥就足以把壳打崩。
-        if getattr(self, "heavy_direct", True) and _is_heavy(ch.slug):
-            return direct_url
-        if ch.mode == "cast" and _needs_signed_headers(_url_host(direct_url)):
-            return proxied or direct_url
-        return direct_url
 
     def _chunk(self, ch, raw_seq):
         try:
@@ -2957,15 +2721,24 @@ class Spider(SpiderBase):
         except (TypeError, ValueError):
             return [400, "text/plain; charset=utf-8", "央视频: bad seq"]
         ch.last_access = time.time()
+        key = None
         with ch.lock:
             url = None
-            for key in ch.order:
-                seg = ch.segments.get(key)
+            for k in ch.order:
+                seg = ch.segments.get(k)
                 if seg and seg[0] == seq:
-                    url = seg[3]
+                    key, url = k, seg[3]
                     break
         if not url:
             return [404, "text/plain; charset=utf-8", "央视频: 切片已过期"]
+
+        def _drop_dead_segment():
+            # 4K 等签名段过期会 403，踢出后滚动窗口不再重复命中死链
+            with ch.lock:
+                if key in ch.segments and key in ch.order:
+                    ch.order.remove(key)
+                    ch.segments.pop(key, None)
+
         cached = TS_CACHE.get(url)
         if cached is not None:
             return [200, "video/mp2t", cached, {"Cache-Control": "no-cache, no-store"}]
@@ -2974,23 +2747,15 @@ class Spider(SpiderBase):
             if ch.mode == "cast":
                 status, body, _ = _cast_client().get(url, headers)
             else:
-                status, body, _ = _http("GET", url, headers, None,
-                                        getattr(self, "ts_timeout", 8.0))
+                status, body, _ = _http("GET", url, headers, None, 20)
         except Exception as error:
-            return [502, "text/plain; charset=utf-8",
+            _drop_dead_segment()
+            return [503, "text/plain; charset=utf-8",
                     "央视频: 切片错误 %s" % type(error).__name__]
         if status < 200 or status >= 300 or not body:
-            return [502, "text/plain; charset=utf-8", "央视频: 切片 HTTP %d" % status]
-        # 大切片保护：宁可让这一片失败，也绝不把几十 MB 交回壳。
-        # 过大的 bytes 过一次跨语言桥就足以让 NanoHTTPD 走到 status=null 的分支。
-        limit = int(float(getattr(self, "ts_max_mb", 16) or 0) * 1048576)
-        if limit and len(body) > limit:
-            _mark_heavy(ch.slug)
-            _log('%s chunk %.1fMB > %.1fMB, 标记直连'
-                 % (ch.slug, len(body) / 1048576.0, limit / 1048576.0))
-            return [502, "text/plain; charset=utf-8",
-                    "央视频: 切片 %.1fMB 超上限，已切直连，请重进"
-                    % (len(body) / 1048576.0)]
+            _drop_dead_segment()
+            # 上游 403/404 归一成 404，让播放器跳到下一段而不是重试死链
+            return [404, "text/plain; charset=utf-8", "央视频: 切片 HTTP %d" % status]
         TS_CACHE.put(url, body)
         return [200, "video/mp2t", body, {"Cache-Control": "no-cache, no-store"}]
 
@@ -3030,29 +2795,6 @@ class Spider(SpiderBase):
         if slug:
             return self._probe(slug, mode)
         lines = ["net: %s" % ("urllib(直连)" if DIRECT else "容器fetch优先/urllib兜底"),
-                 "live_mode: %s  no_proxy: %s  direct_wait: %.1fs"
-                 % (getattr(self, "live_mode", "proxy"),
-                    getattr(self, "no_proxy", False),
-                    getattr(self, "direct_wait", 6.0)),
-                 "resp_style: %s  b64: %s  serial: %s  ts_timeout: %.1fs"
-                 % (getattr(self, "resp_style", "list"),
-                    getattr(self, "b64_body", False),
-                    getattr(self, "serial", False),
-                    getattr(self, "ts_timeout", 8.0)),
-                 "wait: %.1fs  cast_wait: %.1fs  proxy_timeout: %.1fs"
-                 % (getattr(self, "wait", 8.0), getattr(self, "cast_wait", 12.0),
-                    getattr(self, "proxy_timeout", 6.0)),
-                 "cast_direct: %s  cast_m3u: %s  cast_entries: %s"
-                 % (getattr(self, "cast_direct", True),
-                    getattr(self, "cast_m3u", False),
-                    getattr(self, "cast_entries", False)),
-                 "ts_direct: %s  prefer_proxy: %s  heavy_direct: %s  ts_max_mb: %.0f"
-                 % (getattr(self, "ts_direct", True),
-                    getattr(self, "prefer_proxy", False),
-                    getattr(self, "heavy_direct", True),
-                    getattr(self, "ts_max_mb", 16.0)),
-                 "heavy(运行时): %s"
-                 % (",".join(sorted(_HEAVY_RUNTIME)) or "(无)"),
                  "logo源: %s" % (_LOGO_BASE or "(未探测到)"),
                  "频道总数: %d" % len(CHANNEL_STATE), ""]
         try:
