@@ -1,6 +1,6 @@
 {
 "spider":"./jar/dummy.jar;md5;4fcff3209276d2776d3f320474751453", 
-"wallpaper":"/Pictures/magpie.jpg","logo":"./Pictures/converter.gif",
+"wallpaper":"./Pictures/magpie.jpg","logo":"./Pictures/converter.gif",
 
 "sites": [
 //{"key":"裤佬豆瓣片单","name":"🐮┆豆瓣┆跑马灯","type":3,"api":"csp_Douban","jar":"./jar/跑马灯.jar","searchable": 1,"quickSearch":0,"filterable": 1,"ext":"./jar/跑马灯.txt"},
