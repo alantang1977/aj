@@ -1,7 +1,7 @@
 
 {
 "spider":"./jar/dummy.jar;md5;09c3693dd068fd9b586f45d7d9c71916", 
-"wallpaper":"https://imgs.catvod.com","logo":"https://cnb.cool/junchao.tang/jtv/-/git/raw/main/Pictures/junmeng.gif",
+"wallpaper":"./Pictures/magpie.jpg","logo":"./Pictures/converter.gif",
 
 "sites": [
 //{"key":"裤佬豆瓣片单","name":"🐮┆豆瓣┆跑马灯","type":3,"api":"csp_Douban","jar":"./jar/跑马灯.jar","searchable": 1,"quickSearch":0,"filterable": 1,"ext":"./jar/跑马灯.txt"},
