@@ -249,7 +249,7 @@
 {"name": "🦋┆蝴蝶影视「直播」","type": 0,"url": "https://lytvs.top/py/custom_lives.m3u","ua": "okhttp/5.3.2"},
 {"name": "🦋┆央卫TV「直播」","type": 0,"ua": "okhttp/5.3.2","url": "http://47.120.41.246:8025/vip/jar/zb.php"},
 
-{"api": "./py/yangshipin.py","ext": {},"name": "📺┆央视频「测试直播」"},
+{"api": "./py/yangshipin.py","ext": {},"name": "📺┆央视频全频道「直播 v9.4」"},
 
 {"name": "📺┆央视频「高清直播」","type": 3,"api": "./py/ysp-fongmi.py","url": "ysp://all","ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"},
 
