@@ -20,7 +20,7 @@
 //{"key":"枫叶4k","name":"🍄┆枫叶4k┆影视","type":3,"api":"./js/枫叶4k影院.js","style":{"type":"rect","ratio":1.33},"changeable":1},
 
 {"key":"山有木兮","name": "🌦️┆木兮┆影视","type": 3,"api": "./py/山有木兮.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
-{"key":"木鸡影视","name": "🍄┆木鸡┆云搜","type": 3,"api": "./py/木鸡影视.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
+{"key":"木鸡影视","name": "🍄┆木鸡┆云搜","type": 3,"api": "./py/木鸡影视.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0,"jar":"./jar/pro.jar"},
 //{"key":"久久热","name": "🌦️┆久热┆影视","type": 3,"api": "./py/久久热.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
 //{"key":"欧乐影院","name": "🌦️┆欧乐┆影院","type": 3,"api": "./py/欧乐影院.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
 
