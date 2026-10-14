@@ -1,7 +1,7 @@
 
 {
 "spider":"./jar/dummy.jar;md5;09c3693dd068fd9b586f45d7d9c71916", 
-"wallpaper":"./Pictures/magpie.jpg","logo":"./Pictures/converter.gif",
+"wallpaper":"https://imgs.catvod.com","logo":"https://cnb.cool/junchao.tang/jtv/-/git/raw/main/Pictures/junmeng.gif",
 
 "sites": [
 //{"key":"裤佬豆瓣片单","name":"🐮┆豆瓣┆跑马灯","type":3,"api":"csp_Douban","jar":"./jar/跑马灯.jar","searchable": 1,"quickSearch":0,"filterable": 1,"ext":"./jar/跑马灯.txt"},
@@ -20,7 +20,7 @@
 //{"key":"枫叶4k","name":"🍄┆枫叶4k┆影视","type":3,"api":"./js/枫叶4k影院.js","style":{"type":"rect","ratio":1.33},"changeable":1},
 
 {"key":"山有木兮","name": "🌦️┆木兮┆影视","type": 3,"api": "./py/山有木兮.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
-{"key":"木鸡影视","name": "🍄┆木鸡┆云搜","type": 3,"api": "./py/木鸡影视.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0,"jar":"./jar/pro.jar"},
+{"key":"木鸡影视","name": "🐔┆木鸡影视┆影视","type": 3,"api": "./py/木鸡影视.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
 //{"key":"久久热","name": "🌦️┆久热┆影视","type": 3,"api": "./py/久久热.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
 //{"key":"欧乐影院","name": "🌦️┆欧乐┆影院","type": 3,"api": "./py/欧乐影院.py","searchable": 1,"quickSearch": 0,"filterable": 0,"changeable": 0},
 
@@ -247,12 +247,8 @@
 {"name": "🚣🏻┆全国地区「直播」","type": 0,"url": "https://iboxfree.neocities.org/555.txt","playerType":1},
 {"name": "🐬┆综合「直播」","type": 0,"playerType": 2,"url": "https://ds65.tv1288.xyz","ua": "bingcha/1.1 (mianfeifenxiang) "},
 {"name": "🦋┆蝴蝶影视「直播」","type": 0,"url": "https://lytvs.top/py/custom_lives.m3u","ua": "okhttp/5.3.2"},
-{"name": "🦋┆央卫TV「直播」","type": 0,"ua": "okhttp/5.3.2","url": "http://47.120.41.246:8025/vip/jar/zb.php"},
-
 {"api": "./py/yangshipin.py","ext": {},"name": "📺┆央视频全频道「直播 v9.4」"},
-
 {"name": "📺┆央视频「高清直播」","type": 3,"api": "./py/ysp-fongmi.py","url": "ysp://all","ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"},
-
 {"name": "🦋┆锋云直播「直播」","type": 3,"url": "https://gh-proxy.org/https://raw.githubusercontent.com/807080747/zv/refs/heads/main/suale.txt","ua": "okhttp/5.3.2","timeout": 10,"playerType": 2},
 {"name": "🍅┆全国直播「live」","type":0,"url":"http://wangziduoqing.com/yuan/zb.txt","ua":"okHttp","timeout":10,"playerType":2},
 {"name": "🏄‍♂️┆MyTV「serv00」","type": 0,"ua": "okhttp","url": "https://alantang.serv00.net/m3u/jtv.m3u"},
@@ -264,10 +260,10 @@
 {"name": "🥑┆mafly「直播」","type": 0,"url": "https://gh-proxy.org/https://raw.githubusercontent.com/mhmdxahmd/mafly/refs/heads/main/youtube.m3u","playerType":1},
 {"name": "🌺┆tushen6「直播」","type": 0,"url": "https://gh-proxy.org/https://raw.githubusercontent.com/tushen6/Tattoo/main/OK/TV/lzxw.txt","playerType":1},
 
-
 {"name": "📺┆油管新闻「直播」","type": 3,"api": "https://000.hfr1107.top/lz/py/ytbzb.py","ext": {"proxy": "http://127.0.0.1:2080","channels": "https://000.hfr1107.top/lz/json/油管直播.txt"}},
 {"name": "📺┆中央卫视「高清直播」","type": 3,"api": "https://000.hfr1107.top/lz/py/live_ysp.py"},
 {"name": "📺┆汤中央卫视「server00」","type": 3,"api": "./py/live_ysp.py"},
+{"name": "🐳┆广东荔枝「直播」","type": 3,"api": "./py/广东荔枝.py"},
 
 ##NAS部署直播
 {"name": "🥷┆myTV「server00」","type": 0,"ua": "okhttp","url": "https://alantang.serv00.net/mytv.php?p=m3u"},
