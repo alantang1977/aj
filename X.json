@@ -247,7 +247,7 @@
 {"name": "🚣🏻┆全国地区「直播」","type": 0,"url": "https://iboxfree.neocities.org/555.txt","playerType":1},
 {"name": "🐬┆综合「直播」","type": 0,"playerType": 2,"url": "https://ds65.tv1288.xyz","ua": "bingcha/1.1 (mianfeifenxiang) "},
 {"name": "🦋┆蝴蝶影视「直播」","type": 0,"url": "https://lytvs.top/py/custom_lives.m3u","ua": "okhttp/5.3.2"},
-{"api": "./py/yangshipin.py","ext": {},"name": "📺┆央视频全频道「直播 v9.4」"},
+{"api": "./live/ysp-live-v9.5.py","ext": {},"name": "📺┆央视频全频道「直播 v9.5」"},
 {"name": "📺┆央视频「高清直播」","type": 3,"api": "./py/ysp-fongmi.py","url": "ysp://all","ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"},
 {"name": "🦋┆锋云直播「直播」","type": 3,"url": "https://gh-proxy.org/https://raw.githubusercontent.com/807080747/zv/refs/heads/main/suale.txt","ua": "okhttp/5.3.2","timeout": 10,"playerType": 2},
 {"name": "🍅┆全国直播「live」","type":0,"url":"http://wangziduoqing.com/yuan/zb.txt","ua":"okHttp","timeout":10,"playerType":2},
