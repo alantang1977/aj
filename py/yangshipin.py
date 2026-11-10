@@ -30,8 +30,24 @@ ext 可选：
   cast_entries    true 时直播源 M3U 也导出投屏条目（默认 false，只出源1）
   live_mode       proxy(默认) 走代理滚动缓冲；redirect 直接 302 到官方 m3u8，
                   省掉握手等待（投屏源必须带签名头，会自动退回 proxy）
+  zap_debounce / cast_zap_debounce  换台防抖秒数，默认 10：切台后先出 1080p，
+                  停留超过该秒数才后台升级高码流（0=关闭，每频道独立计时）
   cast_timeout / cast_insecure / cast_cache_ttl / cast_interval / cast_jitter
-  cast_session_ttl / cast_heartbeat / cast_links / cast_persist / cast_device_json
+  cast_session_ttl / cast_heartbeat / cast_links
+  cast_persist    true 时投屏设备身份落盘（默认 false，重启即换新身份，行为与旧版一致）
+  cast_device_json  设备身份文件路径（cast_persist=true 时生效，默认脚本同目录 cast-device-state.json）
+
+广东频道（外部直连块，已内置 23 路）：
+  - 广州台 3 路（官方 gztv CDN）、广东台 17 路（GRTN，经聚合签发）、地市台 3 路
+  - 统一走本地代理入口并直接 302 到官方 CDN，本机不跑视频流量；
+    台标走 fanmingming 中文台标库，可在 EXTERNAL_LOGO_OVERRIDE 覆盖
+  - 点播首页「广东频道」分类、搜索、直播 M3U 均会出现，proxy/redirect 两种模式行为一致
+
+时移回看：内置频道（见 TIMESHIFT_SUPPORTED）的 M3U 自带 catchup 标签，
+  播放器用 ?playseek=起-止（yyyyMMddHHmmss）即可回放近 7 天；外部频道不支持
+
+安全加固：外部代理（type=m3u8/ts）做 SSRF 拦截（禁回环/内网/链路本地），
+  显式跟随 301/302/303/307/308（最多 4 跳，逐跳校验），单切片回传上限 35MB
 
 排错：浏览器打开 代理地址?type=diag
       加 &slug=cctv1 会当场拉一次流（&mode=redirect 则测直连取址）
@@ -53,7 +69,7 @@ ext 可选：
 - 依赖：纯标准库，内置纯 Python AES-256-GCM 与 RSA-OAEP，不需要装加解密包
 """
 
-import base64, gzip, hashlib, hmac as _hmac, http.cookiejar, json, os, random, re, socket, struct, threading, time
+import base64, datetime, gzip, hashlib, hmac as _hmac, http.cookiejar, json, os, random, re, socket, struct, threading, time
 import ssl
 import urllib.error, urllib.parse, urllib.request, uuid
 from collections import deque
@@ -2031,6 +2047,10 @@ class CastResolver(object):
   self.zap_time = 0.0
   self.zap_pending = ''
   self.zap_generation = 0
+  # v9.5 每频道独立换台防抖（精准化）
+  self.zap_times = {}
+  self.zap_pending_channels = set()
+  self.zap_generations = {}
   self.last_device_wipe_at = 0.0
   self.device_wipe_day = ''
   self.device_wipe_count = 0
@@ -2052,8 +2072,55 @@ class CastResolver(object):
   except (TypeError, ValueError):
    self.zap_debounce = 10.0
   self.device_file = str(opts.get('cast_device_json') or '')
-  self.persist = bool(opts.get('cast_persist', False)) and bool(self.device_file)
+  self.persist = bool(opts.get('cast_persist', False))
+  if self.persist and not self.device_file:
+   # 开启持久化但未指定文件时，默认放在脚本同目录
+   self.device_file = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), 'cast-device-state.json')
   self.limiter = CastLimiter(self.refresh_interval, self.jitter)
+
+ # ---- 设备身份持久化（v9.5：400 自愈后身份落盘，重启不丢失）----
+ def _load_device_state(self):
+  if not (self.persist and self.device_file):
+   return None
+  try:
+   with open(self.device_file, 'r', encoding='utf-8') as f:
+    data = json.load(f)
+  except (OSError, ValueError):
+   return None
+  if not isinstance(data, dict) or not isinstance(data.get('profile'), dict):
+   return None
+  pd = data['profile']
+  if not pd.get('android_id') or not pd.get('mac'):
+   return None
+  return data
+
+ def _save_device_state(self, sess):
+  if not (self.persist and self.device_file):
+   return
+  payload = {
+   'profile': {name: getattr(sess.profile, name, '') for name in CastProfile.__slots__},
+   'cloud_guid': sess.cloud_guid or '',
+   'screen_param': sess.screen_param or '',
+   'cast_model': sess.cast_model or '',
+   'saved_at': int(time.time()),
+  }
+  parent = os.path.dirname(os.path.abspath(self.device_file))
+  if parent:
+   os.makedirs(parent, exist_ok=True)
+  tmp = '%s.tmp.%s' % (self.device_file, os.getpid())
+  with open(tmp, 'w', encoding='utf-8') as f:
+   f.write(json.dumps(payload, ensure_ascii=False, sort_keys=True))
+   f.flush()
+   os.fsync(f.fileno())
+  os.replace(tmp, self.device_file)
+
+ def _wipe_device_file(self):
+  if self.persist and self.device_file:
+   try:
+    os.remove(self.device_file)
+   except OSError:
+    pass
 
  # ---- 小工具 ----
  def new_client(self):
@@ -2074,6 +2141,8 @@ class CastResolver(object):
     sess.linked_channels.discard(ch)
 
  def zap_debounced(self, channel):
+  """v9.5 精准换台防抖：每频道独立计时。切台后先出 1080p，停留超过防抖秒数
+ 且频道仍在被观看时，才后台请求高码流，避免快速切台打爆设备并发池。"""
   if channel in TRUE_4K_CHANNELS:
    return False
   try:
@@ -2085,35 +2154,67 @@ class CastResolver(object):
   now = time.time()
   with self.state_lock:
    entry = self.cache.get(channel)
-   if entry is not None and entry.fresh(now):
+   if entry is not None and entry.fresh(now) \
+     and not self._entry_missing_signed_headers(entry):
     return False
-   if self.zap_channel != channel:
-    self.zap_channel = channel
-    self.zap_time = now
-    self.zap_pending = ''
-   if self.zap_pending == channel:
+   sess = self.sessions.get(0)
+   if sess is not None and channel in sess.linked_channels \
+     and entry is not None and (now - entry.expires_at < 30.0):
+    return False
+   self.zap_channel = channel
+   if channel in self.zap_pending_channels:
     return True
-   if now - self.zap_time < debounce:
+   ch_zap_time = self.zap_times.get(channel, 0.0)
+   if ch_zap_time <= 0.0 or (now - ch_zap_time > max(debounce * 3.0, 30.0)):
+    ch_zap_time = now
+    self.zap_times[channel] = now
+    self.zap_time = now
+   if now - ch_zap_time < debounce:
     self.zap_pending = channel
+    self.zap_pending_channels.add(channel)
     self.zap_generation += 1
-    gen = self.zap_generation
-    delay = max(0.1, debounce - (now - self.zap_time))
-    threading.Thread(target=self._zap_resolve_worker, args=(channel, gen, delay), daemon=True).start()
+    gen = self.zap_generations.get(channel, 0) + 1
+    self.zap_generations[channel] = gen
+    delay = max(0.1, debounce - (now - ch_zap_time))
+    threading.Thread(target=self._zap_resolve_worker,
+     args=(channel, gen, delay), daemon=True).start()
+    return True
+  return False
+
+ @staticmethod
+ def _entry_missing_signed_headers(entry):
+  host = entry.final_host or _url_host(entry.final_url)
+  if not _needs_signed_headers(host):
+   return False
+  for key in ('APPID', 'APPSIGN', 'APPRANDOMSTR'):
+   if not (entry.playback_headers or {}).get(key, '').strip():
     return True
   return False
 
  def _zap_resolve_worker(self, channel, gen, delay):
   time.sleep(delay)
+  now = time.time()
   with self.state_lock:
-   if gen != self.zap_generation or self.zap_channel != channel:
+   if gen != self.zap_generations.get(channel, 0):
+    self.zap_pending_channels.discard(channel)
+    return
+   last_acc = self.channel_last_access.get(channel, 0.0)
+   # 用户已快速切走：不再为这个频道预取高码流
+   if (now - last_acc > max(delay + 2.0, 12.0)) or \
+     (self.zap_channel != channel and now - last_acc > 5.0):
+    self.zap_pending_channels.discard(channel)
+    self.zap_times.pop(channel, None)
+    if self.zap_pending == channel:
+     self.zap_pending = ''
     return
   try:
    self.resolve(channel, force=True)
-   _cast_log('[%s] high-bitrate background prefetch done' % channel)
+   _cast_log('[%s] 高码率后台预取完成, 继续停留将自动升级' % channel)
   except Exception as e:
-   _cast_log('[%s] background prefetch failed: %s, keep 1080p' % (channel, e))
+   _cast_log('[%s] 高码率后台预取失败: %s, 继续 1080p' % (channel, e))
   finally:
    with self.state_lock:
+    self.zap_pending_channels.discard(channel)
     if self.zap_pending == channel:
      self.zap_pending = ''
 
@@ -2137,6 +2238,10 @@ class CastResolver(object):
    self.cache.clear()
    self.failures.clear()
    self.channel_last_access.clear()
+   self.zap_pending_channels.clear()
+   self.zap_times.clear()
+  # 400 自愈：旧身份作废，连落盘文件一起删，确保重建的是全新身份
+  self._wipe_device_file()
   try:
    self.ensure_slot_session(0)
   except Exception as e:
@@ -2251,12 +2356,26 @@ class CastResolver(object):
 
  def bootstrap_session(self, prefer_4k=False, profile_seed=None):
   tpl = _random_device_template(prefer_4k)
+  saved = None if profile_seed else self._load_device_state()
+  saved_guid = ''
   if profile_seed:
    p = _device_profile_from_template(profile_seed, profile_seed.get('android_id')
     or _random_hex(16), profile_seed.get('mac')
     or _random_mac())
+  elif saved:
+   # 复用已落盘的设备身份（重启后仍是同一台电视，云端不再判为陌生设备）
+   pd = saved.get('profile') or {}
+   p = CastProfile()
+   for name in CastProfile.__slots__:
+    setattr(p, name, pd.get(name, ''))
+   saved_guid = str(saved.get('cloud_guid') or '')
+   _cast_log('reuse persisted device identity model=%s' % p.model)
   else:
    p = _device_profile_from_template(tpl, _random_hex(16), _random_mac())
+  screen_param = (saved.get('screen_param') if saved else '') \
+   or tpl.get('screen_param', '7680-4320-280')
+  cast_model = (saved.get('cast_model') if saved else '') \
+   or tpl.get('cast_model') or p.model
   ident = _build_identity(p, CAST_APP_CHANNEL, CAST_VERSION)
   client = self.new_client()
   session_key = self.app_start_flow(client, p, ident)
@@ -2265,6 +2384,8 @@ class CastResolver(object):
    cloud_guid = self.cloud_registration_flow(ident, ident.x_uid)
   except Exception as e:
    _cast_log('cloud register skip: %s' % e)
+  if not cloud_guid and saved_guid:
+   cloud_guid = saved_guid
   try:
    self.heartbeat_flow(client, p, ident, cloud_guid)
   except Exception as e:
@@ -2276,8 +2397,8 @@ class CastResolver(object):
   sess.session_key = session_key
   sess.cloud_guid = cloud_guid
   sess.version = CAST_VERSION
-  sess.screen_param = tpl.get('screen_param', '7680-4320-280')
-  sess.cast_model = tpl.get('cast_model') or p.model
+  sess.screen_param = screen_param
+  sess.cast_model = cast_model
   sess.created_at = time.time()
   sess.generation = 0
   sess.linked_channels = set()
@@ -2285,6 +2406,11 @@ class CastResolver(object):
   sess.heartbeat_count = 1
   sess.last_heartbeat_error = ''
   self._telemetry(client, p, ident, cloud_guid)
+  if self.persist:
+   try:
+    self._save_device_state(sess)
+   except Exception as e:
+    _cast_log('persist device state failed: %s' % e)
   _cast_log('session ready model=%s uid=%s cloud=%s'
    % (p.model, ident.x_uid[:12], 'yes' if cloud_guid else 'no'))
   return sess
@@ -2588,6 +2714,7 @@ class CastResolver(object):
    self.channel_last_access[channel] = time.time()
    if self.zap_pending == channel:
     self.zap_pending = ''
+   self.zap_pending_channels.discard(channel)
   self.prepared = True
   self.prepared_at = time.time()
   return entry
@@ -2746,6 +2873,275 @@ def _has_native(slug):
  return bool(info.get('sid')) and bool(info.get('pid'))
 
 
+# ================================================================ 时移回看（v9.5）
+# 支持时移的频道（JCE 回放接口有效），与 ysp-live v9.5 保持一致
+TIMESHIFT_SUPPORTED = {
+ "cctv1", "cctv2", "cctv3", "cctv4", "cctv5", "cctv5p", "cctv6",
+ "cctv7", "cctv8", "cctv9", "cctv10", "cctv13", "cctv8k",
+ "cgtn", "cgtnfr", "cgtnru", "cgtnar", "cgtnes", "cgtndoc",
+ "cetv1", "guoxue",
+ "bjws", "jsws", "dfws", "zjws", "hnws", "hbws", "gdws", "gxws",
+ "hljws", "hainanws", "cqws", "szws", "scws", "henanws", "dnws",
+ "gzws", "jxws", "lnws", "ahws", "hebws", "sdws", "tjws", "jlws",
+ "saxws", "nxws", "nmgws", "ynws", "shanxiws", "qhws",
+ "xizangws", "xjws", "gsws",
+}
+
+
+def _parse_catchup_time_val(val_str):
+ """解析回看时间：ISO8601 / 带 Z / 10 位秒 / 13 位毫秒 / 14 位 / 12 位（CST=UTC+8）。"""
+ if not val_str:
+  return None
+ val = val_str.strip()
+ if not val:
+  return None
+ cst = datetime.timezone(datetime.timedelta(hours=8))
+ if 'T' in val or ('-' in val and ':' in val):
+  try:
+   iso_val = val[:-1] + '+00:00' if val.upper().endswith('Z') else val
+   dt = datetime.datetime.fromisoformat(iso_val)
+   if dt.tzinfo is None:
+    dt = dt.replace(tzinfo=cst)
+   return int(dt.timestamp())
+  except Exception:
+   pass
+ is_utc = val.upper().endswith('Z')
+ clean_val = re.sub(r'\.\d+', '', val)
+ digits = "".join(c for c in clean_val if c.isdigit())
+ if not digits:
+  return None
+ if len(digits) == 10:
+  return int(digits)
+ if len(digits) == 13:
+  return int(int(digits) / 1000)
+ tz = datetime.timezone.utc if is_utc else cst
+ if len(digits) >= 14:
+  try:
+   dt = datetime.datetime.strptime(digits[:14], "%Y%m%d%H%M%S").replace(tzinfo=tz)
+   return int(dt.timestamp())
+  except Exception:
+   pass
+ if len(digits) == 12:
+  try:
+   dt = datetime.datetime.strptime(digits, "%Y%m%d%H%M").replace(tzinfo=tz)
+   return int(dt.timestamp())
+  except Exception:
+   pass
+ return None
+
+
+def _parse_catchup_query(query):
+ """从 localProxy 参数里解析 playseek/start/end 等回看参数，返回 (start, end) 或 None。"""
+ if not query:
+  return None
+ qs = urllib.parse.parse_qs(query)
+ start_ts = None
+ end_ts = None
+ if "playseek" in qs:
+  ps = qs["playseek"][0]
+  if "-" in ps:
+   a, b = ps.split("-", 1)
+   start_ts = _parse_catchup_time_val(a)
+   end_ts = _parse_catchup_time_val(b)
+  else:
+   start_ts = _parse_catchup_time_val(ps)
+ if not start_ts and "start" in qs:
+  start_ts = _parse_catchup_time_val(qs["start"][0])
+ if not end_ts and "end" in qs:
+  end_ts = _parse_catchup_time_val(qs["end"][0])
+ if not start_ts and "utc" in qs:
+  start_ts = _parse_catchup_time_val(qs["utc"][0])
+ if not end_ts and "lutc" in qs:
+  end_ts = _parse_catchup_time_val(qs["lutc"][0])
+ if not start_ts and "starttime" in qs:
+  start_ts = _parse_catchup_time_val(qs["starttime"][0])
+ if not end_ts and "endtime" in qs:
+  end_ts = _parse_catchup_time_val(qs["endtime"][0])
+ if start_ts is not None:
+  now = int(time.time())
+  if end_ts is None or end_ts <= start_ts:
+   end_ts = max(start_ts + 60, min(start_ts + 7200, now))
+  return start_ts, end_ts
+ return None
+
+
+def _fetch_abs_playlist(url, depth=0):
+ """抓取回看 m3u8：主表先展开到第一条子流，所有相对地址全部绝对化。"""
+ req = urllib.request.Request(url, headers={
+  'User-Agent': 'qqlive',
+  'Referer': 'https://live.cctv.cn/',
+  'Accept': 'application/vnd.apple.mpegurl,application/json,*/*'})
+ with urllib.request.urlopen(req, timeout=10) as r:
+  text = r.read().decode('utf-8', 'replace')
+  final = r.geturl()
+ if depth < 2:
+  lines = text.splitlines()
+  for i, line in enumerate(lines):
+   if line.strip().startswith('#EXT-X-STREAM-INF'):
+    for nxt in lines[i + 1:]:
+     s = nxt.strip()
+     if s and not s.startswith('#'):
+      return _fetch_abs_playlist(urllib.parse.urljoin(final, s), depth + 1)
+    break
+ out = []
+ for line in text.splitlines():
+  s = line.strip()
+  if s and not s.startswith('#'):
+   out.append(urllib.parse.urljoin(final, s))
+  else:
+   out.append(line)
+ return '\n'.join(out) + '\n'
+
+
+# ================================================================ 外部媒体安全抓取（v9.5）
+def _safe_ext_url(url):
+ """SSRF 轻量防护：只允许 http/https，拒绝回环/本机/内网/链路本地地址。"""
+ try:
+  parts = urllib.parse.urlsplit(url)
+ except ValueError:
+  return False
+ if parts.scheme not in ('http', 'https'):
+  return False
+ host = (parts.hostname or '').lower()
+ if not host:
+  return False
+ if host in ('localhost', 'ip6-localhost') or host == '::1' or host == '127.0.0.1':
+  return False
+ if host.startswith('127.') or host.startswith('169.254.') or host.startswith('10.'):
+  return False
+ if host.startswith('192.168.'):
+  return False
+ if re.match(r'^172\.(1[6-9]|2\d|3[01])\.', host):
+  return False
+ return True
+
+
+class _SafeRedirect(urllib.request.HTTPRedirectHandler):
+ """最多跟随 4 跳，且每一跳都必须通过 SSRF 校验。"""
+ max_redirections = 4
+
+ def redirect_request(self, req, fp, code, msg, hdrs, newurl):
+  if not _safe_ext_url(newurl):
+   return None  # 返回 None 后 urllib 直接抛 HTTPError，由调用方按 503 处理
+  return super().redirect_request(req, fp, code, msg, hdrs, newurl)
+
+
+_EXT_OPENER = urllib.request.build_opener(
+ urllib.request.ProxyHandler({}), _SafeRedirect())
+
+
+def _fetch_ext(url, headers, timeout=12):
+ """显式跟随重定向(301/302/303/307/308，最多 4 跳)的外部媒体抓取。
+ 返回 (status, body_bytes, content_type, final_url)。"""
+ if not _safe_ext_url(url):
+  raise ValueError('unsafe url')
+ req = urllib.request.Request(url, headers=headers, method='GET')
+ try:
+  resp = _EXT_OPENER.open(req, timeout=timeout)
+ except urllib.error.HTTPError as e:
+  body = b''
+  try:
+   body = e.read()
+  except Exception:
+   pass
+  ctype = ''
+  try:
+   ctype = e.headers.get('Content-Type', '') if e.headers else ''
+  except Exception:
+   pass
+  return e.code, body, ctype, url
+ try:
+  body = resp.read()
+  ctype = resp.headers.get('Content-Type', '') or ''
+  final = resp.geturl()
+  return resp.status, body, ctype, final
+ finally:
+  resp.close()
+
+
+# ================================================================
+# 外部频道（广东频道：广州台 / 广东台 / 广东地市台，统一分组）
+# 播放器直连各台官方 CDN，本机仅以 302 下发地址、不跑视频流量。
+# 本块为追加功能，不参与、不影响央视源1(JCE/bk)/源2(投屏) 原有流程。
+# ----------------------------------------------------------------
+GZCDN = 'http://tencentplaygzrb01.gztv.com/live'
+XG = 'https://xiongguoying.top'
+EXTERNAL_LOGO_BASE = 'https://live.fanmingming.cn/tv'
+# 外部频道: (slug, 名称, 分组, [播放地址...])；多个地址可用于容错
+# 排序：广州综合 > 广州新闻 > 南国都市4K > 其余广东频道
+EXTERNAL_CHANNELS = [
+    # ---- 广州台（官方 gztv CDN）----
+    ('gzzh', '广州综合', '广东频道', [GZCDN + '/zonghes.m3u8']),
+    ('gzxw', '广州新闻', '广东频道', [GZCDN + '/xinwen.m3u8']),
+    ('ngds', '南国都市4K', '广东频道', [GZCDN + '/nanguodushi.m3u8']),
+    # ---- 广东台（官方 gdtv CDN，经聚合签发）----
+    ('gdzj', '广东珠江', '广东频道', [XG + '/gdzj']),
+    ('gdxw', '广东新闻', '广东频道', [XG + '/gdxw']),
+    ('gdty', '广东体育', '广东频道', [XG + '/gdty']),
+    ('dwqws', '大湾区卫视', '广东频道', [XG + '/dwqws']),
+    ('gdgg', '广东民生', '广东频道', [XG + '/gdgg']),
+    ('gdys', '广东影视', '广东频道', [XG + '/gdys']),
+    ('gdse', '广东少儿', '广东频道', [XG + '/gdse']),
+    ('jjkt', '嘉佳卡通', '广东频道', [XG + '/jjkt']),
+    ('gdzy', '广东4K综艺', '广东频道', [XG + '/gdzy']),
+    ('dwqhw', '大湾区海外', '广东频道', [XG + '/dwqhw']),
+    ('nfgw', '南方购物', '广东频道', [XG + '/nfgw']),
+    ('lnxq', '岭南戏曲', '广东频道', [XG + '/lnxq']),
+    ('gdjdj', '广东经典剧', '广东频道', [XG + '/gdjdj']),
+    ('jlp', '广东纪录片', '广东频道', [XG + '/jlp']),
+    ('jkpd', 'GRTN健康', '广东频道', [XG + '/jkpd']),
+    ('shpd', 'GRTN生活', '广东频道', [XG + '/shpd']),
+    ('gdyd', '广东移动', '广东频道', [XG + '/gdyd']),
+    # ---- 广东地市台 ----
+    ('stzh', '汕头综合', '广东频道', [XG + '/stzh']),
+    ('swzh', '汕尾综合', '广东频道', [XG + '/swzh']),
+    ('jmzh', '江门综合', '广东频道', [XG + '/jmzh']),
+]
+EXTERNAL_MAP = {e[0]: e for e in EXTERNAL_CHANNELS}
+# ================================================================
+# 广东频道台标手动覆盖（优先级最高）
+# 若 fanmingming 源没有某个频道的台标，在此处填入该频道台标的直链地址即可。
+# 格式：'频道slug':'台标图片完整URL',
+# ----------------------------------------------------------------
+EXTERNAL_LOGO_OVERRIDE = {
+    # 'gzzh': 'https://live.fanmingming.cn/tv/广州综合.png',
+    # 'gdzj': 'https://live.fanmingming.cn/tv/广东珠江.png',
+}
+
+
+def _fanming_logo_name(slug, name):
+ """将频道 slug/名称 转换为 fanmingming 台标库的文件名（不含扩展名）。"""
+ s = slug.lower()
+ if s.startswith('cctv'):
+  suffix = s[4:]
+  if suffix == '5p':
+   return 'CCTV5+'
+  if suffix == '4k':
+   return 'CCTV4K'
+  if suffix == '8k':
+   return 'CCTV8K'
+  if suffix == '164k':
+   return 'CCTV16-4K'
+  return 'CCTV%s' % suffix.upper()
+ if s == 'cgtn':
+  return 'CGTN'
+ return name
+
+
+def _external_logo_url(slug, name):
+ """外部频道台标：手动覆盖优先，否则取 fanmingming 中文台标库。"""
+ if slug in EXTERNAL_LOGO_OVERRIDE:
+  return EXTERNAL_LOGO_OVERRIDE[slug]
+ return '%s/%s.png' % (EXTERNAL_LOGO_BASE, urllib.parse.quote(name))
+
+
+# 外部频道注册进 CHANNEL_MAP（标记 external=True，不建 CHANNEL_STATE、不后台刷新）
+for _slug, _name, _grp, _urls in EXTERNAL_CHANNELS:
+ CHANNEL_MAP[_slug] = {'slug': _slug, 'name': _name, 'sid': '', 'pid': '',
+  'defn': 'fhd', 'cast': None, 'external': True,
+  'urls': _urls, 'group': _grp}
+
+
 # ================================================================ 台标
 
 LOGO_MIRRORS = [
@@ -2815,6 +3211,9 @@ def _ensure_logo_source(wait=3.0):
 
 
 def _logo_url(slug, name=''):
+ # 外部频道（广东）台标走 fanmingming 中文台标库，与内置镜像无关
+ if slug in EXTERNAL_MAP:
+  return _external_logo_url(slug, name)
  # 台标只给 CDN 直连地址；拿不到就返回空，由 Spider._logo 决定要不要走代理兜底
  _ensure_logo_source(wait=0)
  fname = _logo_file(slug, name)
@@ -2825,6 +3224,15 @@ def _logo_url(slug, name=''):
 
 
 def _fetch_logo_bytes(slug, name):
+ if slug in EXTERNAL_MAP:
+  try:
+   st, data, _ = _http('GET', _external_logo_url(slug, name),
+    {'User-Agent': UA, 'Referer': 'https://live.cctv.cn/'}, None, LOGO_TIMEOUT)
+   if st >= 200 and st < 300 and data[:4] == b'\x89PNG':
+    return data
+  except Exception:
+   pass
+  return _LOGO_PLACEHOLDER
  fname = _logo_file(slug, name)
  if fname:
   bases = ([_LOGO_BASE] if _LOGO_BASE else []) + [b for b in LOGO_MIRRORS if b != _LOGO_BASE]
@@ -2852,6 +3260,11 @@ class _ChannelState:
   self.mode = mode
   self._starting = False
   self._prefetching = set()  # 正在/已经后台预取的段 key，防止重复回源
+  # v9.5 时间线防倒退：已见过的段 key 不允许再次进窗口；last_pdt 为最新 PDT
+  self.seen_keys = deque(maxlen=MAX_SEGS * 2)
+  self.last_pdt = ''
+  # 上一次渲染播放列表时的取流源（jce/bk/cast），切换时注入 DISCONTINUITY
+  self.last_src = ''
 
 
 CHANNEL_STATE = {}
@@ -2873,18 +3286,47 @@ def _seg_key(url, pdt):
 
 
 def _append_segments(ch, segs):
+ # v9.5 冷启动/防倒退：首次只取服务端窗口最后 25 片，避免倒灌使播放列表 seq 倒退；
+ # 之后按 PDT 与 seen_keys 丢弃旧片，时间线只能单调向前。
  with ch.lock:
-  for dur, pdt, url in segs:
-   key = _seg_key(url, pdt)
-   if key in ch.segments:
-    ch.segments[key][3] = url
-    continue
-   ch.seq += 1
-   ch.segments[key] = [ch.seq, dur, pdt, url]
-   ch.order.append(key)
+  added = 0
+  is_init = not ch.order
+  if is_init:
+   for _dur, pdt, url in segs:
+    k = _seg_key(url, pdt)
+    if k not in ch.seen_keys:
+     ch.seen_keys.append(k)
+   init_segs = segs[-25:] if len(segs) > 25 else segs
+   for dur, pdt, url in init_segs:
+    key = _seg_key(url, pdt)
+    ch.seq += 1
+    ch.segments[key] = [ch.seq, dur, pdt, url]
+    ch.order.append(key)
+    added += 1
+    if pdt:
+     ch.last_pdt = pdt
+  else:
+   for dur, pdt, url in segs:
+    if pdt and ch.last_pdt and pdt <= ch.last_pdt:
+     continue
+    key = _seg_key(url, pdt)
+    if key in ch.segments:
+     # 已在窗口：原地换新签名 URL，不改 seq（403 自愈关键）
+     ch.segments[key][3] = url
+     continue
+    if key in ch.seen_keys:
+     continue
+    ch.seen_keys.append(key)
+    ch.seq += 1
+    ch.segments[key] = [ch.seq, dur, pdt, url]
+    ch.order.append(key)
+    added += 1
+    if pdt:
+     ch.last_pdt = pdt
   while len(ch.order) > MAX_SEGS:
    ch.segments.pop(ch.order.popleft(), None)
   ch.last_error = ''
+ return added
 
 
 def _parse_m3u8(text, base_url):
@@ -2900,6 +3342,24 @@ def _parse_m3u8(text, base_url):
    segs.append((dur, pdt, urllib.parse.urljoin(base_url, line)))
    pdt = ''
  return segs
+
+
+def _inject_hls_discontinuity(pl):
+ """源切换（jce/bk 互备）后在第一片前插入 #EXT-X-DISCONTINUITY，
+ 避免播放器把两段时间戳/解码上下文不连续的流接在一起花屏。"""
+ if '#EXT-X-DISCONTINUITY' in pl:
+  return pl
+ out, inserted = [], False
+ for line in pl.splitlines():
+  s = line.strip()
+  if not inserted and (s.startswith('#EXT-X-PROGRAM-DATE-TIME:')
+   or s.startswith('#EXTINF:') or (s and not s.startswith('#'))):
+   out.append('#EXT-X-DISCONTINUITY')
+   inserted = True
+  out.append(line)
+ if not inserted:
+  return pl
+ return '\n'.join(out) + ('\n' if pl.endswith('\n') else '')
 
 
 def _jce_refresh(ch):
@@ -3299,6 +3759,7 @@ def _safe(value):
 GROUP_NAMES = {
  "cctv": "央视频道", "satellite": "卫视频道", "cgtn": "CGTN",
  "4k": "4K超清", "premium": "付费剧场", "other": "其他",
+ "gd": "广东频道",
 }
 
 EPG_XML_URL = "https://epg.112114.xyz/pp.xml"
@@ -3326,6 +3787,10 @@ def _epg_id(slug, name=""):
 
 def _classify(slug):
  cats = []
+ if CHANNEL_MAP.get(slug, {}).get('external'):
+  # 外部频道（广东）单独成组，不与央视/卫视分类混用
+  cats.append("gd")
+  return cats
  if (re.match(r"^cctv\d+$", slug) or slug == "cctv5p") and slug not in TRUE_4K_CHANNELS:
   cats.append("cctv")
  if slug in TRUE_4K_CHANNELS:
@@ -3366,6 +3831,12 @@ def _entries(tid='all'):
   if tid in ('', 'all') or tid in _classify(slug):
    out.append({'slug': slug, 'name': name,
     'group': _group_name(slug), 'epg': '', 'cast': False})
+ if tid != 'cast':
+  # 外部频道（广东）追加在内置频道之后，不参与投屏分类
+  for slug, name, grp, _urls in EXTERNAL_CHANNELS:
+   if tid in ('', 'all') or tid == 'gd':
+    out.append({'slug': slug, 'name': name, 'group': grp,
+     'epg': '', 'cast': False, 'external': True})
  return out
 
 
@@ -3412,14 +3883,20 @@ def _upstream_url(ch):
 
 
 class _TsCache(object):
- """切片 LRU 缓存：代理被反复拖同一个 ts 时省一次回源。"""
+ """切片 LRU 缓存：代理被反复拖同一个 ts 时省一次回源。
 
- def __init__(self, max_mb=0):
+ v9.5：条目带 180s 过期（直播段重放过久会过期）；命中即置为最新 LRU；
+ 淘汰时按容量回收；提供 hits/misses 命中率供 diag。"""
+
+ def __init__(self, max_mb=0, max_age=180):
   self.max_bytes = int(max(0.0, float(max_mb)) * 1024 * 1024)
+  self.max_age = max_age
   self.data = {}
   self.order = deque()
   self.size = 0
   self.lock = threading.Lock()
+  self.hits = 0
+  self.misses = 0
 
  def configure(self, max_mb):
   with self.lock:
@@ -3428,31 +3905,68 @@ class _TsCache(object):
     k = self.order.popleft()
     b = self.data.pop(k, None)
     if b is not None:
-     self.size -= len(b)
+     self.size -= len(b[0])
 
  def enabled(self):
   return self.max_bytes > 0
+
+ def _evict_locked(self, key):
+  b = self.data.pop(key, None)
+  if b is not None:
+   self.size -= len(b[0])
 
  def get(self, key):
   if not self.max_bytes:
    return None
   with self.lock:
-   return self.data.get(key)
+   item = self.data.get(key)
+   if item is None:
+    self.misses += 1
+    return None
+   body, expire_at = item
+   if expire_at and time.time() > expire_at:
+    try:
+     self.order.remove(key)
+    except ValueError:
+     pass
+    self._evict_locked(key)
+    self.misses += 1
+    return None
+   self.hits += 1
+   return body
 
  def put(self, key, body):
   if not self.max_bytes or not body:
    return
   with self.lock:
-   if key in self.data or len(body) > self.max_bytes:
+   if len(body) > self.max_bytes:
     return
-   self.data[key] = body
+   if key in self.data:
+    # 已缓存：刷新内容与过期时间并移到 LRU 队尾
+    try:
+     self.order.remove(key)
+    except ValueError:
+     pass
+    self.size -= len(self.data[key][0])
+    self.data.pop(key, None)
+   now = time.time()
+   expire_at = (now + self.max_age) if self.max_age > 0 else 0
+   self.data[key] = (body, expire_at)
    self.order.append(key)
    self.size += len(body)
    while self.size > self.max_bytes and self.order:
-    k = self.order.popleft()
-    b = self.data.pop(k, None)
-    if b is not None:
-     self.size -= len(b)
+    old_key = self.order.popleft()
+    self._evict_locked(old_key)
+
+ def stats(self):
+  with self.lock:
+   total = self.hits + self.misses
+   return {
+    'count': len(self.data),
+    'size_mb': round(self.size / (1024.0 * 1024.0), 2),
+    'hits': self.hits, 'misses': self.misses,
+    'hit_rate': ('%.1f%%' % (100.0 * self.hits / total)) if total else '0%',
+   }
 
 
 TS_CACHE = _TsCache(200)  # v9.4对齐：默认200MB，覆盖4K/8K窗口，0=关闭
@@ -3562,7 +4076,7 @@ class Spider(SpiderBase):
   for key, name in (("cctv", "央视频道"), ("satellite", "卫视频道"),
    ("cgtn", "CGTN"), ("4k", "4K超清"),
    ("premium", "付费剧场"), ("other", "其他"),
-   ("cast", "央视高码")):
+   ("gd", "广东频道"), ("cast", "央视高码")):
    classes.append({"type_id": key, "type_name": name})
   return {"class": classes, "filters": {}, "list": self._cards("all")}
 
@@ -3587,6 +4101,21 @@ class Spider(SpiderBase):
   is_cast = slug != base
   if is_cast and not info.get("cast"):
    return {"list": []}
+  if info.get("external"):
+   # 广东外部频道：统一走本地代理入口，由 localProxy 直接 302 到官方 CDN
+   play_from = "广东频道"
+   play_url = "直连$%s" % base
+   desc = "【📺 广东频道】\n频道: %s\n线路: 官方 CDN 302 直连\n本机仅下发地址、不跑视频流量" % info["name"]
+   desc = desc.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+   return {"list": [{
+    "vod_id": slug, "vod_name": info["name"],
+    "vod_pic": self._logo(base, info["name"]),
+    "vod_actor": self.brandActor, "vod_director": self.brandDirector,
+    "vod_remarks": format_remarks("广东", "直连"),
+    "vod_content": desc,
+    "vod_play_from": play_from,
+    "vod_play_url": play_url,
+   }]}
   if is_cast:
    self._ensure_cast_ready()
    play_from = CAST_GROUP_NAME
@@ -3616,6 +4145,9 @@ class Spider(SpiderBase):
    for slug, name, _s, _p, _d, _c in CHANNELS:
     if keyword in name.lower() or keyword in slug.lower():
      cards.append(self._card(slug, name))
+   for slug, name, _grp, _urls in EXTERNAL_CHANNELS:
+    if keyword in name.lower() or keyword in slug.lower():
+     cards.append(self._card(slug, name))
   return {"page": 1, "pagecount": 1, "limit": len(cards), "total": len(cards), "list": cards}
 
  def playerContent(self, flag, id, vipFlags):
@@ -3629,6 +4161,12 @@ class Spider(SpiderBase):
     "url": self._purl(type="m3u8", url=slug),
     "header": {"User-Agent": UA, "Referer": "https://live.cctv.cn/"},
     "format": "application/x-mpegURL"}
+  # 广东外部频道：挂本地代理入口，localProxy 命中后直接 302 到官方 CDN
+  ext_info = CHANNEL_MAP.get(slug)
+  if ext_info and ext_info.get("external"):
+   return {"parse": 0, "playUrl": "",
+    "url": self._purl(type="m3u8", slug=slug),
+    "header": {}, "format": "application/x-mpegURL"}
   ch = CHANNEL_STATE.get(slug)
   if ch is None:
    return {"parse": 0, "playUrl": "", "url": "", "header": {}}
@@ -3672,9 +4210,14 @@ class Spider(SpiderBase):
   base = _base_slug(slug)
   source = epg_slug or base
   tvg = _safe(self.epg_ids.get(source) or _epg_id(source, name))
-  return '#EXTINF:-1 tvg-id="%s" tvg-name="%s" tvg-logo="%s" group-title="%s",%s' % (
+  # v9.5 时移回看标签（仅自有频道，外部频道不支持）
+  catchup = ''
+  if base in TIMESHIFT_SUPPORTED:
+   catchup = ' catchup="append" catchup-days="7" ' \
+    'catchup-source="?playseek=${(b)yyyyMMddHHmmss}-${(e)yyyyMMddHHmmss}"'
+  return '#EXTINF:-1 tvg-id="%s" tvg-name="%s" tvg-logo="%s" group-title="%s"%s,%s' % (
    tvg, tvg, self._logo(base, name),
-   _safe(group or _group_name(base)), _safe(name))
+   _safe(group or _group_name(base)), catchup, _safe(name))
 
  # ---------------- 本地代理（取代本地 HTTP 服务） ----------------
  def localProxy(self, param):
@@ -3708,9 +4251,36 @@ class Spider(SpiderBase):
     # 继续往下走滚动直播播放列表，段 URL 已是绝对代理地址无需改写
     return self._ext_media(kind, query)
    slug = query.get("slug") or query.get("id") or ""
+   # 广东外部频道：直接 302 到官方 CDN（proxy/redirect 两种模式都直连，不跑本机流量）
+   ext = EXTERNAL_MAP.get(slug)
+   if ext is not None:
+    ext_urls = ext[3] if len(ext) > 3 and ext[3] else []
+    if ext_urls:
+     return [302, "text/plain", "",
+      {"Location": ext_urls[0], "Cache-Control": "no-store"}]
+    return [404, "text/plain; charset=utf-8",
+     "央视频: 外部频道暂无地址 " + slug]
    ch = CHANNEL_STATE.get(slug)
    if ch is None:
     return [404, "text/plain; charset=utf-8", "央视频: 未知频道 " + slug]
+   # 时移回看（catchup playseek）：只对自有频道、且不是切片请求时生效
+   if not query.get("seq") and slug in TIMESHIFT_SUPPORTED:
+    cq = urllib.parse.urlencode({k: v for k, v in query.items()
+     if k in ('playseek', 'start', 'end', 'utc', 'lutc',
+       'starttime', 'endtime')})
+    catchup = _parse_catchup_query(cq)
+    if catchup:
+     info = CHANNEL_MAP.get(slug, {})
+     if info.get("sid") and info.get("pid"):
+      start_ts, end_ts = catchup
+      try:
+       ts_url = jce_timeshift_url(info["pid"], info["sid"],
+        start_ts, end_ts, info.get("defn") or "fhd")
+       pl = _fetch_abs_playlist(ts_url)
+       return [200, "application/vnd.apple.mpegurl", pl,
+        {"Cache-Control": "no-cache, no-store"}]
+      except Exception as e:
+       _cast_log("[%s] 时移获取失败: %s，回退直播" % (slug, e))
    if query.get("seq"):
     return self._chunk(ch, query["seq"])
    want_redirect = self.live_mode == "redirect"
@@ -3731,38 +4301,52 @@ class Spider(SpiderBase):
  def _ext_media(self, kind, query):
   """type=m3u8/ts：代理外部 m3u8 与其 .ts/.key 段。
 
-     m3u8 分支把相对段地址、#EXT-X-KEY 等 URI= 改写为本代理地址（type=ts），
-     否则播放器会以 127.0.0.1 本地代理为基准解析相对路径请求不存在的路由；
-     ts 分支原样二进制回传段数据（识别 0x47 同步字节给 video/mp2t）。
-    """
+  v9.5 加固：
+   - SSRF 防护：只允许 http/https 公网地址，拒绝回环/内网/链路本地；
+   - 显式跟随 301/302/303/307/308 重定向（最多 4 跳，逐跳校验）；
+   - 单个切片回传上限 35MB，防止异常大包拖垮内存；
+   - 主表先展开到媒体表，段/密钥 URI 全部改写为代理地址。
+  """
   url = urllib.parse.unquote(query.get("url") or "").replace("\\/", "/").strip()
   if url.startswith("//"):
    url = "https:" + url
   if not url.startswith("http"):
    return [400, "text/plain; charset=utf-8", "央视频: 缺少 url 参数"]
+  if not _safe_ext_url(url):
+   return [403, "text/plain; charset=utf-8", "央视频: 禁止访问该地址"]
   referer = urllib.parse.unquote(query.get("referer") or query.get("ref") or "").strip()
   if not referer.startswith("http"):
    referer = ""
   headers = {"User-Agent": UA, "Accept": "*/*"}
   if referer:
    headers["Referer"] = referer
+  range_header = query.get("range") or query.get("Range") or ""
+  if range_header:
+   headers["Range"] = range_header
   if kind == "ts":
    try:
-    status, body, _ = _http("GET", url, headers, None, 20)
+    status, body, ctype, _final = _fetch_ext(url, headers, 20)
    except Exception as error:
     return [503, "text/plain; charset=utf-8",
      "央视频: 段暂时错误 %s" % type(error).__name__]
+   if status in (301, 302, 303, 307, 308):
+    return [503, "text/plain; charset=utf-8", "央视频: 重定向过多"]
    if status == 599 or status >= 500 or status in (408, 425, 429):
    # 网络类失败可恢复：回 503 让播放器退避重试，不断流
     return [503, "text/plain; charset=utf-8",
      "央视频: 段暂时不可用 HTTP %d" % status]
    if status < 200 or status >= 300 or not body:
     return [503, "text/plain; charset=utf-8", "央视频: 段 HTTP %d" % status]
+   if len(body) > 35 * 1024 * 1024:
+    return [503, "text/plain; charset=utf-8", "央视频: 切片过大"]
    mime = "video/mp2t" if body[:1] == b"\x47" else "application/octet-stream"
-   return [200, mime, body, {"Cache-Control": "no-cache, no-store"}]
-  # kind == "m3u8"：拉上游 m3u8（主表先展开到媒体表）再改写
+   out_headers = {"Cache-Control": "no-cache, no-store"}
+   if status == 206:
+    out_headers["Accept-Ranges"] = "bytes"
+   return [status if status in (200, 206) else 200, mime, body, out_headers]
+  # kind == "m3u8"：拉上游 m3u8（显式跟随重定向，主表先展开到媒体表）再改写
   try:
-   status, raw, _ = _http("GET", url, headers, None, 12)
+   status, raw, _ctype, final_url = _fetch_ext(url, headers, 12)
   except Exception as error:
    return [503, "text/plain; charset=utf-8",
     "央视频: m3u8 暂时错误 %s" % type(error).__name__]
@@ -3782,16 +4366,17 @@ class Spider(SpiderBase):
        break
      break
    if sub:
-    sub_url = sub if sub.startswith("http") else urllib.parse.urljoin(url, sub)
-    try:
-     st2, raw2, _ = _http("GET", sub_url, headers, None, 12)
-     if st2 == 200 and raw2:
-     # 子流的相对段要以子流地址为基准，后续改写统一用 sub_url
-      url, text = sub_url, raw2.decode("utf-8", "replace")
-    except Exception:
-     pass
+    sub_url = sub if sub.startswith("http") else urllib.parse.urljoin(final_url, sub)
+    if _safe_ext_url(sub_url):
+     try:
+      st2, raw2, _c2, final2 = _fetch_ext(sub_url, headers, 12)
+      if st2 == 200 and raw2:
+      # 子流的相对段要以子流地址为基准，后续改写统一用 final2
+       final_url, text = final2, raw2.decode("utf-8", "replace")
+     except Exception:
+      pass
   return [200, "application/vnd.apple.mpegurl",
-   self._rewrite_ext_m3u8(text, url, referer),
+   self._rewrite_ext_m3u8(text, final_url, referer),
    {"Cache-Control": "no-cache, no-store"}]
 
  def _rewrite_ext_m3u8(self, text, base, referer=""):
@@ -3899,7 +4484,13 @@ class Spider(SpiderBase):
     out.append("#EXT-X-PROGRAM-DATE-TIME:" + pdt)
    out.append("#EXTINF:%.3f," % dur)
    out.append(self._purl(slug=ch.slug, seq=seq))
-  return [200, "application/vnd.apple.mpegurl", "\n".join(out) + "\n",
+  body = "\n".join(out) + "\n"
+  # v9.5：取流源发生切换（jce↔bk 互备）时插 discontinuity，避免花屏
+  src = ch.mode
+  if ch.last_src and ch.last_src != src:
+   body = _inject_hls_discontinuity(body)
+  ch.last_src = src
+  return [200, "application/vnd.apple.mpegurl", body,
    {"Cache-Control": "no-cache, no-store"}]
 
  def _chunk(self, ch, raw_seq):
@@ -3993,6 +4584,10 @@ class Spider(SpiderBase):
   """?type=diag&slug=cctv1 —— 当场拉一次，看看卡在哪个源。"""
   ch = CHANNEL_STATE.get(slug)
   if ch is None:
+   ext = EXTERNAL_MAP.get(slug)
+   if ext is not None:
+    return "外部频道: %s (%s)\n模式: 302 直连官方 CDN\n地址: %s\n" % (
+     ext[1], ext[2], ext[3][0])
    return "未知频道: %s\n" % slug
   out = ["频道: %s  模式: %s" % (ch.slug, ch.mode)]
   if mode == "redirect" or (self.live_mode == "redirect" and mode != "proxy"):
@@ -4016,7 +4611,11 @@ class Spider(SpiderBase):
    return self._probe(slug, mode)
   lines = ["net: %s" % ("urllib(直连)" if DIRECT else "容器fetch优先/urllib兜底"),
    "logo源: %s" % (_LOGO_BASE or "(未探测到)"),
-   "频道总数: %d" % len(CHANNEL_STATE), ""]
+   "频道总数: %d (内置 %d + 外部 %d；投屏条目 %d)" % (
+    len(CHANNELS) + len(EXTERNAL_CHANNELS),
+    len(CHANNELS), len(EXTERNAL_CHANNELS),
+    len([c for c in CHANNELS if c[5]])),
+   "TS缓存: %s" % TS_CACHE.stats(), ""]
   try:
    for line in CAST.status().splitlines():
     lines.append(line)
@@ -4028,6 +4627,9 @@ class Spider(SpiderBase):
    with ch.lock:
     count = len(ch.order)
    lines.append("%-14s mode=%-6s segs=%-4d err=%s" % (slug, ch.mode, count, ch.last_error))
+  lines.append("--- 外部频道（官方CDN 302 直连，不后台刷新）---")
+  for slug, name, grp, urls in EXTERNAL_CHANNELS:
+   lines.append("%-10s 模式=外部直连(302) 上次刷新=官方CDN 名称=%s" % (slug, name))
   return "\n".join(lines) + "\n"
 
  # ---------------- 小工具 ----------------
@@ -4069,6 +4671,12 @@ class Spider(SpiderBase):
 
  def _card(self, slug, name=""):
   base = _base_slug(slug)
+  if base in EXTERNAL_MAP:
+   # 广东外部频道：独立品牌角标
+   return {"vod_id": slug, "vod_name": name,
+    "vod_pic": self._logo(base, name),
+    "vod_remarks": "广东 | 直连",
+    "style": {"type": "rect", "ratio": 1.78}}
   tag = ""
   if base in TRUE_4K_CHANNELS:
    tag = "真4K"
@@ -4091,3 +4699,4 @@ class Spider(SpiderBase):
    CAST.prepare()
   except Exception as error:
    _log('cast prepare failed: %s' % error)
+#（注：内容由AI生成）

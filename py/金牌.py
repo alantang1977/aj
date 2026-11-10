@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Author  : Doubebly
-# @Time    : 2025/5/29 22:07
-
 
 import sys
 import hashlib
@@ -18,7 +15,7 @@ class Spider(Spider):
         return "Aidianying"
 
     def init(self, extend):
-        self.home_url = 'https://m.sdzhgt.com/'
+        self.home_url = 'https://www.lwdys.com'
         self.ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
         self.error_url = "https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/mp4/xgplayer-demo-720p.mp4"
 
@@ -73,6 +70,8 @@ class Spider(Spider):
         {'key': 'year',
          'name': '年份',
          'value': [{'n': '全部', 'v': ''},
+                   {'n': '2026', 'v': '/year/2026'},
+                   {'n': '2025', 'v': '/year/2025'},
                    {'n': '2024', 'v': '/year/2024'},
                    {'n': '2023', 'v': '/year/2023'},
                    {'n': '2022', 'v': '/year/2022'},
@@ -140,6 +139,8 @@ class Spider(Spider):
         {'key': 'year',
          'name': '时间',
          'value': [{'n': '全部', 'v': ''},
+                   {'n': '2026', 'v': '/year/2026'},
+                   {'n': '2025', 'v': '/year/2025'},
                    {'n': '2024', 'v': '/year/2024'},
                    {'n': '2023', 'v': '/year/2023'},
                    {'n': '2022', 'v': '/year/2022'},
@@ -199,6 +200,8 @@ class Spider(Spider):
         {'key': 'year',
          'name': '时间',
          'value': [{'n': '全部', 'v': ''},
+                   {'n': '2026', 'v': '/year/2026'},
+                   {'n': '2025', 'v': '/year/2025'},
                    {'n': '2024', 'v': '/year/2024'},
                    {'n': '2023', 'v': '/year/2023'},
                    {'n': '2022', 'v': '/year/2022'},
@@ -248,6 +251,8 @@ class Spider(Spider):
         {'key': 'year',
          'name': '时间',
          'value': [{'n': '全部', 'v': ''},
+                   {'n': '2026', 'v': '/year/2026'},
+                   {'n': '2025', 'v': '/year/2025'},
                    {'n': '2024', 'v': '/year/2024'},
                    {'n': '2023', 'v': '/year/2023'},
                    {'n': '2022', 'v': '/year/2022'},

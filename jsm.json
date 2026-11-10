@@ -1,6 +1,6 @@
 {
-"spider": "./pg.jar",
-"wallpaper": "http://饭太硬.top/深色壁纸/api.php",
+"spider": "./jar/pg.jar",
+"wallpaper":"https://动态壁纸.饭.eu.org/","logo":"https://cnb.cool/junchao.tang/jtv/-/git/raw/main/Pictures/junmeng.gif",
 "sites": [
 {"key":"豆瓣","name":"豆瓣","type":3,"api":"csp_Douban","searchable":0,"changeable":1,"indexs":1,"ext":"./lib/tokenm.json$$$./lib/douban.json"},
 {"key":"TGDouban","name":"TG豆瓣","type":3,"api":"csp_TGDouban","timeout":120,"ext":{"token":"./lib/tokenm.json","json":"./lib/tgsearch.json","keywords":"名称,片名,推荐","tgsearch_url":"http://127.0.0.1:10199","tgsearch_media_url":"http://127.0.0.1:10199","channellist":"tgsearchers3,leoziyuan,peccxinpd,yydf_hzl,vip115hot,clouddriveresources,q66share,yggpan,xiangxiunbb,oscardianying,dianying4k,wfysfx02,quarkfree,ucwpzy,ucquark,mcph860,mcph608,xunleibl,taoxgzy,yunpanx,kkxlzy,mcph086,dianyingshare,quark_movies,zyfx2022,alyp_1,quanziyuanshe,hdhhd21,guoman4k,duan_ju,q_dianying,q_dianshiju,sharepanfilms,mcph01,jdjdn1111,panjclub,baicaozy,yunpan189,tianyirigeng,cloudtianyi,tyysypzypd,txtyzy,kuakeclound,tyypzhpd,zyfb123,xx123pan,zyzhpd123,yingshifenxiang123,yp123pan,wp123zy115:oneonefivewpfx,lsp115,qukanmovie,channel_shares_115,share4115,ysxb48,aliyun:zaihuayun,sharealiyun,aliyun_4k_movies,aliyunys,qixingzhenren,yunpanuc,ucshare,ucwangpan","proxy":"proxy","douban":"./lib/douban.json","danmu":true},"style":{"type":"rect","ratio":0.7}},
@@ -86,6 +86,7 @@
 {"name":"最强国内直播(合并版可回看)","type":0,"url":"http://127.0.0.1:10079/c/3600/null/http://127.0.0.1:35456/all.m3u","ua":"okhttp/3.15","epg":"http://127.0.0.1:10079/p/0/proxy/https://epg.cdn.loc.cc?ch={name}&date={date}","logo":"http://127.0.0.1:10079/p/0/proxy/https://cdn.jsdmirror.com/gh/fanmingming/live@master/tv/{name}.png","catchup":{"type":"append","source":"?livemode=4&starttime=${(b)yyyyMMdd'T'HHmm}00.00Z&endtime=${(e)yyyyMMdd'T'HHmm}00.00Z"}},
 {"name":"最强国内直播","type":0,"url":"http://127.0.0.1:10079/c/3600/null/http://127.0.0.1:35456/tv.m3u","ua":"okhttp/3.15","epg":"http://127.0.0.1:10079/p/0/proxy/https://epg.cdn.loc.cc?ch={name}&date={date}","logo":"http://127.0.0.1:10079/p/0/proxy/https://cdn.jsdmirror.com/gh/fanmingming/live@master/tv/{name}.png","catchup":{"type":"append","source":"?livemode=4&starttime=${(b)yyyyMMdd'T'HHmm}00.00Z&endtime=${(e)yyyyMMdd'T'HHmm}00.00Z"}},
 {"name":"最强国内直播(真低码)","type":0,"url":"http://127.0.0.1:10079/c/3600/null/http://127.0.0.1:35456/ysptx.m3u","ua":"okhttp/3.15","epg":"http://127.0.0.1:10079/p/0/proxy/https://epg.cdn.loc.cc?ch={name}&date={date}","logo":"http://127.0.0.1:10079/p/0/proxy/https://cdn.jsdmirror.com/gh/fanmingming/live@master/tv/{name}.png"},
+{"name":"最强国内直播(纯低码)","type":0,"url":"http://127.0.0.1:10079/c/3600/null/http://127.0.0.1:35456/yspweb.m3u","ua":"okhttp/3.15","epg":"http://127.0.0.1:10079/p/0/proxy/https://epg.cdn.loc.cc?ch={name}&date={date}","logo":"http://127.0.0.1:10079/p/0/proxy/https://cdn.jsdmirror.com/gh/fanmingming/live@master/tv/{name}.png"},
 {"name":"最强国内直播(高码)","type":0,"url":"http://127.0.0.1:10079/c/3600/null/http://127.0.0.1:35456/ysptp.m3u","ua":"okhttp/3.15","epg":"http://127.0.0.1:10079/p/0/proxy/https://epg.cdn.loc.cc?ch={name}&date={date}","logo":"http://127.0.0.1:10079/p/0/proxy/https://cdn.jsdmirror.com/gh/fanmingming/live@master/tv/{name}.png"},
 {"name":"最强国内直播(MGLIVE可回看)","type":0,"url":"http://127.0.0.1:10079/c/3600/null/http://127.0.0.1:35456/migu.m3u","ua":"okhttp/3.15","epg":"http://127.0.0.1:10079/p/0/proxy/https://epg.cdn.loc.cc?ch={name}&date={date}","logo":"http://127.0.0.1:10079/p/0/proxy/https://cdn.jsdmirror.com/gh/fanmingming/live@master/tv/{name}.png","catchup":{"type":"append","source":"?livemode=4&starttime=${(b)yyyyMMdd'T'HHmm}00.00Z&endtime=${(e)yyyyMMdd'T'HHmm}00.00Z"}},
 {"name":"最强国内直播(MGEVENT)","type":0,"url":"http://127.0.0.1:35456/miguevent.m3u","ua":"okhttp/3.15","epg":"http://127.0.0.1:10079/p/0/proxy/https://epg.cdn.loc.cc?ch={name}&date={date}","logo":"http://127.0.0.1:10079/p/0/proxy/https://cdn.jsdmirror.com/gh/fanmingming/live@master/tv/{name}.png","catchup":{"type":"append","source":"?livemode=4&starttime=${(b)yyyyMMdd'T'HHmm}00.00Z&endtime=${(e)yyyyMMdd'T'HHmm}00.00Z"}},
@@ -129,7 +130,7 @@
 "pptv",
 "mgtv",
 "wasu"
-]
+],
 "doh": [
 {"name":"Google","url":"https://dns.google/dns-query","ips":["8.8.4.4","8.8.8.8"]},
 {"name":"Cloudflare","url":"https://cloudflare-dns.com/dns-query","ips":["1.1.1.1","1.0.0.1","2606:4700:4700::1111","2606:4700:4700::1001"]},
@@ -171,5 +172,5 @@
 ".*boku.*",
 ".*nivod.*",
 ".*ulivetv.*"
-],
+]
 }
